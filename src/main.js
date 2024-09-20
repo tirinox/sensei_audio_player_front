@@ -1,25 +1,29 @@
+import 'vuetify/styles'; // Global CSS has to be imported
 import './assets/main.css'
 
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-
-import 'onsenui/css/onsenui.css'
-import 'onsenui/css/onsen-css-components.css'
+import {createApp} from 'vue'
+import {createPinia} from 'pinia'
 
 import App from './App.vue'
 import router from './router'
-import VueOnsen from 'vue-onsenui'
-
+import 'vuetify/styles'
+import { createVuetify } from 'vuetify'
+import '@mdi/font/css/materialdesignicons.css';
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
 
 const app = createApp(App)
 
-app.use(VueOnsen)
-import * as components from 'vue-onsenui/esm/components';
-
-Object.values(components).forEach(component =>
-    app.component(component.name, component));
 
 app.use(createPinia())
 app.use(router)
+app.use(createVuetify({
+
+    theme: {
+        defaultTheme: 'light',
+    },
+    components,
+    directives,
+}))
 
 app.mount('#app')

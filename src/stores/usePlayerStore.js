@@ -17,9 +17,30 @@ export const usePlayerStore = defineStore('player', {
                         'id': 1,
                         'url': 'test/sumo.mp3',
                         'title': 'Sumo',
+                        'phrases': [
+                            {
+                                'id': 1,
+                                'start': 0,
+                                'end': 10,
+                                'text': 'Sumo'
+                            },
+                            {
+                                'id': 2,
+                                'start': 10,
+                                'end': 20,
+                                'text': 'Sumo'
+                            },
+                            {
+                                'id': 3,
+                                'start': 20,
+                                'end': 30,
+                                'text': 'Sumo'
+                            }
+                        ]
                     }
                 ]
                 this.playlist = data;
+                this.currentTrack = this.playlist[0];
                 console.info(`Playlist: ${this.playlist.length}`)
             } catch (error) {
                 console.error('Error fetching playlist:', error);
