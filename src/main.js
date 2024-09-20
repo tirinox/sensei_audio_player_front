@@ -11,6 +11,7 @@ import { createVuetify } from 'vuetify'
 import '@mdi/font/css/materialdesignicons.css';
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import { VPullToRefresh } from 'vuetify/labs/VPullToRefresh'
 
 const app = createApp(App)
 
@@ -22,7 +23,10 @@ app.use(createVuetify({
     theme: {
         defaultTheme: 'light',
     },
-    components,
+    components: {
+        VPullToRefresh,
+        ...components,
+    },
     directives,
 }))
 

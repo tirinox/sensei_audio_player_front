@@ -13,22 +13,27 @@
         </v-btn>
 
         <!-- Title -->
-        <v-toolbar-title>Page Title</v-toolbar-title>
+        <v-toolbar-title>Список записей</v-toolbar-title>
 
       </v-app-bar>
 
       <!-- Content -->
       <v-main>
         <v-container>
-          <v-list lines="one">
-            <v-list-item
-                v-for="track in playlist"
-                :key="track.id"
-                @click="selectTrack(track)"
-            >
-              {{ track.title }}
-            </v-list-item>
-          </v-list>
+          <v-pull-to-refresh
+              :pull-down-threshold="64"
+              @load="pullToRefresh"
+          >
+            <v-list lines="one">
+              <v-list-item
+                  v-for="track in playlist"
+                  :key="track.id"
+                  @click="selectTrack(track)"
+              >
+                {{ track.title }}
+              </v-list-item>
+            </v-list>
+          </v-pull-to-refresh>
         </v-container>
       </v-main>
     </v-container>
@@ -44,8 +49,7 @@ import router from "@/router/index.js";
 const playerStore = usePlayerStore();
 
 const selectTrack = (track) => {
-  playerStore.currentTrack = track;
-  playerStore.currentPhraseIndex = 0;
+  playerStore.selectTrack(track);
   router.push('/player');
 };
 
@@ -56,6 +60,11 @@ onMounted(() => {
 const goBack = () => {
   // router to to player
   router.push('/');
+};
+
+const pullToRefresh = async ({done}) => {
+  await playerStore.fetchPlaylist();
+  done();
 };
 
 const playlist = computed(() => playerStore.playlist);
