@@ -1,6 +1,9 @@
 import {defineStore} from 'pinia';
 import {Howl} from 'howler';
 
+const BASE_PATH = import.meta.env.PROD ? '/audio_db' : '/test';
+console.info('Audio base path:', BASE_PATH);
+
 export const usePlayerStore = defineStore('player', {
     state: () => ({
         playlist: [],
@@ -8,17 +11,23 @@ export const usePlayerStore = defineStore('player', {
         currentPhraseIndex: 0,
         isPlaying: false,
         howler: null,
+        repeatOne: false,
+        isLoadingTrack: false,
+        isLoadingPlaylist: false,
     }),
     actions: {
         async fetchPlaylist() {
             try {
-                const response = await fetch('/test/index.json');
+                this.isLoadingPlaylist = true;
+                const response = await fetch(`${BASE_PATH}/index.json?r=${Math.random()}`);
                 const data = await response.json();
-                let playlist = data.playlist;
+                let playlist = data.files;
+                console.log(playlist)
 
                 // set id for each track
                 playlist.forEach((track, index) => {
                     track.id = index;
+                    track.title = track.audio_file;
                 });
                 this.playlist = playlist;
                 if(this.playlist.length > 0) {
@@ -27,17 +36,21 @@ export const usePlayerStore = defineStore('player', {
                 console.info(`Playlist: ${this.playlist.length}`)
             } catch (error) {
                 console.error('Error fetching playlist:', error);
+            } finally {
+                this.isLoadingPlaylist = false;
             }
         },
 
         async fetchTrack(id) {
             try {
                 const desc = this.playlist[id]
-                const response = await fetch(desc.meta_url);
+                const metaFile = `${BASE_PATH}/${desc.segment_file}?r=${Math.random()}`;
+                console.info('Fetching track:', metaFile);
+                const response = await fetch(metaFile);
                 const t = await response.json();
 
-                t.title = desc.title;
-                t.audio_url = desc.audio_url;
+                Object.assign(t, desc)
+                t.title = desc.audio_file;
 
                 const newSegments = []
                 let i = 1
@@ -59,6 +72,7 @@ export const usePlayerStore = defineStore('player', {
         },
 
         async selectTrack(track) {
+            this.isLoadingTrack = true;
             if(track.id === this.currentTrack.id) {
                 console.info('Track already selected');
                 return;
@@ -76,11 +90,11 @@ export const usePlayerStore = defineStore('player', {
                 sprites[i] = [segment.start, segment.end - segment.start];
                 i++;
             }
-            console.log(sprites)
 
-            console.log('Will load track:',tr.audio_url);
+            const audioFile = `${BASE_PATH}/${tr.audio_file}`
+            console.log('Will load track:', audioFile);
             this.howler = new Howl({
-                src: [tr.audio_url],
+                src: [audioFile],
                 sprite: sprites,
                 html5: true,
                 onend: () => {
@@ -89,24 +103,29 @@ export const usePlayerStore = defineStore('player', {
                 },
                 onload: () => {
                     console.log('Loaded');
+                    this.isLoadingTrack = false;
                 },
                 onloaderror: (id, error) => {
                     console.error('Error loading track:', error);
+                    this.isLoadingTrack = false;
                 },
             });
         },
 
         async togglePlayPause() {
             if (this.isPlaying) {
+                this.isPlaying = false;
                 this.howler.pause();
             } else {
                 await this.playCurrentPhrase();
             }
-            this.isPlaying = !this.isPlaying;
         },
 
         async endPlay() {
             this.isPlaying = false;
+            if(this.repeatOne) {
+                this.nextPhrase(true)
+            }
         },
 
         async prevPhrase() {
@@ -114,9 +133,11 @@ export const usePlayerStore = defineStore('player', {
             await this.playCurrentPhrase();
         },
 
-        async nextPhrase() {
+        async nextPhrase(justShift = false) {
             this.currentPhraseIndex = (this.currentPhraseIndex + 1) % this.totalPhrases;
-            await this.playCurrentPhrase();
+            if(!justShift) {
+                await this.playCurrentPhrase();
+            }
         },
 
         async restartTrack() {
@@ -140,6 +161,9 @@ export const usePlayerStore = defineStore('player', {
         },
         totalPhrases() {
             return this.currentTrack.segments.length
+        },
+        isLoading() {
+            return this.isLoadingTrack || this.isLoadingPlaylist
         }
     },
 })
