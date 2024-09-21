@@ -1,18 +1,18 @@
 <template>
   <div class="controls">
-    <v-btn icon @click="$emit('prev')">
+    <v-btn icon @click="$emit('prev')" :readonly="!enabled">
       <v-icon>mdi-skip-previous</v-icon>
     </v-btn>
 
-    <v-btn icon @click="$emit('playPause')">
+    <v-btn icon @click="$emit('playPause')" size="x-large" :readonly="!enabled">
       <v-icon>{{ isPlaying ? 'mdi-pause' : 'mdi-play' }}</v-icon>
     </v-btn>
 
-    <v-btn icon @click="$emit('next')">
+    <v-btn icon @click="$emit('next')" size="x-large" :readonly="!enabled">
       <v-icon>mdi-skip-next</v-icon>
     </v-btn>
 
-    <v-btn icon @click="$emit('restart')">
+    <v-btn icon @click="$emit('restart')" :readonly="!enabled">
       <v-icon>mdi-replay</v-icon>
     </v-btn>
   </div>
@@ -23,6 +23,10 @@ import { defineProps } from 'vue';
 
 defineProps({
   isPlaying: {
+    type: Boolean,
+    required: true,
+  },
+  enabled: {
     type: Boolean,
     required: true,
   },

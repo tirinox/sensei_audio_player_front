@@ -30,4 +30,6 @@ app.use(createVuetify({
     directives,
 }))
 
+document.title = 'SenseiAudioPlayer'
+
 app.mount('#app')
