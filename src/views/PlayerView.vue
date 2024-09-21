@@ -50,7 +50,7 @@
               <v-card-text>
                 <PlaybackControls
                     :isPlaying="isPlaying"
-                    :enabled="playerStore.currentTrack && !playerStore.isLoading"
+                    :enabled="controlsEnabled"
                     @prev="prevPhrase"
                     @playPause="togglePlayPause"
                     @next="nextPhrase"
@@ -111,10 +111,10 @@ const restartTrack = () => {
 
 // on mount if there is no track selected then redirect to the list
 onMounted(() => {
-  if (!playerStore.currentTrack) {
-    router.clearRoutes()
-    router.replace('/');
-  }
+});
+
+const controlsEnabled = computed(() => {
+  return !!(playerStore.currentTrack && !playerStore.isLoading)
 });
 
 </script>
