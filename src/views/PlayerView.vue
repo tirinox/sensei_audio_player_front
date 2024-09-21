@@ -7,7 +7,7 @@
             fixed
             elevation="2"
         >
-          <!-- Back Button -->
+
           <v-btn icon @click="goBack">
             <v-icon>mdi-arrow-left</v-icon>
           </v-btn>
@@ -18,33 +18,50 @@
         </v-app-bar>
 
         <v-row v-if="playerStore.currentTrack">
-          <v-col cols="12">
+          <v-col>
             <v-card>
               <v-card-title>
+
+                <v-progress-circular
+                    v-if="playerStore.isLoading"
+                    indeterminate
+                    color="primary"></v-progress-circular>
+
                 <h2>{{ playerStore.currentTrack ? playerStore.currentTrack.title : 'Нет записи' }}</h2>
               </v-card-title>
               <v-card-text>
                 <!--                <KaraokeText/>-->
                 <p>{{ currentPhraseIndex + 1 }} / {{ playerStore.totalPhrases }}</p>
-                <p>{{ playerStore.currentPhrase.text }}</p>
+
+                <p v-html="playerStore.currentPhrase.text" class="phrase-text"></p>
                 <ProgressBar
                     :currentTime="currentTime"
                     :duration="phraseDuration"
                 />
-              </v-card-text>
-              <v-card-actions>
 
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+
+        <v-row class="card-controls">
+          <v-col>
+            <v-card>
+              <v-card-text>
                 <PlaybackControls
                     :isPlaying="isPlaying"
+                    :enabled="playerStore.currentTrack && !playerStore.isLoading"
                     @prev="prevPhrase"
                     @playPause="togglePlayPause"
                     @next="nextPhrase"
                     @restart="restartTrack"
                 />
-              </v-card-actions>
+              </v-card-text>
             </v-card>
           </v-col>
         </v-row>
+
+
       </v-container>
     </v-main>
   </v-app>
@@ -103,4 +120,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.phrase-text {
+  font-size: 2em;
+}
+.card-controls {
+  padding-bottom: 50px;
+}
 </style>
