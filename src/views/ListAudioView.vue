@@ -62,10 +62,6 @@ onMounted(() => {
   playerStore.fetchPlaylist();
 });
 
-const goBack = () => {
-  // router to to player
-  router.push('/');
-};
 
 const pullToRefresh = async ({done}) => {
   await playerStore.fetchPlaylist();

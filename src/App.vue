@@ -1,10 +1,14 @@
 <script setup>
+import AccessCodeDialog from "@/components/AccessCodeDialog.vue";
 </script>
 
 <template>
   <v-app>
     <v-main>
+      <AccessCodeDialog></AccessCodeDialog>
+
       <v-container fluid>
+
         <router-view v-slot="{ Component }">
           <transition>
             <component :is="Component" />
