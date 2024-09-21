@@ -8,9 +8,9 @@
           elevation="2"
       >
         <!-- Back Button -->
-        <v-btn icon @click="goBack">
-          <v-icon>mdi-arrow-left</v-icon>
-        </v-btn>
+<!--        <v-btn icon @click="goBack">-->
+<!--          <v-icon>mdi-arrow-left</v-icon>-->
+<!--        </v-btn>-->
 
         <!-- Title -->
         <v-toolbar-title>Список записей</v-toolbar-title>
@@ -31,6 +31,10 @@
                   @click="selectTrack(track)"
               >
                 {{ track.title }}
+                <template v-slot:append>
+                  {{ toHHMMSS(track.length) }}
+                </template>
+
               </v-list-item>
             </v-list>
           </v-pull-to-refresh>
@@ -44,6 +48,7 @@
 import {computed, onMounted} from 'vue';
 import {usePlayerStore} from '../stores/usePlayerStore';
 import router from "@/router/index.js";
+import {toHHMMSS} from "@/helpers/DateHelpers.js";
 
 
 const playerStore = usePlayerStore();
