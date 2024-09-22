@@ -7,8 +7,7 @@ import AccessCodeDialog from "@/components/AccessCodeDialog.vue";
     <v-main>
       <AccessCodeDialog></AccessCodeDialog>
 
-      <v-container fluid>
-
+      <v-container fluid fill-height name="routedcont" style="height: 100vh;">
         <router-view v-slot="{ Component }">
           <transition>
             <component :is="Component" />

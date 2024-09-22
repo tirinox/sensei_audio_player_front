@@ -1,70 +1,54 @@
 <template>
-  <v-app>
-    <v-main>
-      <v-container fluid>
-        <v-app-bar
-            app
-            fixed
-            elevation="2"
-        >
+  <v-container>
+    <v-app-bar
+        app
+        fixed
+        elevation="2"
+    >
+      <v-btn icon @click="goBack">
+        <v-icon>mdi-arrow-left</v-icon>
+      </v-btn>
+      <v-toolbar-title>Проигрыватель</v-toolbar-title>
+    </v-app-bar>
 
-          <v-btn icon @click="goBack">
-            <v-icon>mdi-arrow-left</v-icon>
-          </v-btn>
+    <v-row>
+      <v-col>
+        <v-card>
+          <v-card-title>
+            <v-progress-circular
+                v-if="playerStore.isLoading"
+                indeterminate
+                color="primary"></v-progress-circular>
 
-          <!-- Title -->
-          <v-toolbar-title>Проигрыватель</v-toolbar-title>
+            <h2>{{ playerStore.currentTrack ? playerStore.currentTrack.title : 'Нет записи' }}</h2>
+          </v-card-title>
+          <v-card-text>
+            <p>{{ currentPhraseIndex + 1 }} / {{ playerStore.totalPhrases }}</p>
 
-        </v-app-bar>
+            <p v-html="playerStore.currentPhrase.text" class="phrase-text"></p>
+            <ProgressBar
+                :currentTime="currentTime"
+                :duration="phraseDuration"
+            />
+          </v-card-text>
+        </v-card>
+      </v-col>
 
-        <v-row v-if="playerStore.currentTrack">
-          <v-col>
-            <v-card>
-              <v-card-title>
-
-                <v-progress-circular
-                    v-if="playerStore.isLoading"
-                    indeterminate
-                    color="primary"></v-progress-circular>
-
-                <h2>{{ playerStore.currentTrack ? playerStore.currentTrack.title : 'Нет записи' }}</h2>
-              </v-card-title>
-              <v-card-text>
-                <!--                <KaraokeText/>-->
-                <p>{{ currentPhraseIndex + 1 }} / {{ playerStore.totalPhrases }}</p>
-
-                <p v-html="playerStore.currentPhrase.text" class="phrase-text"></p>
-                <ProgressBar
-                    :currentTime="currentTime"
-                    :duration="phraseDuration"
-                />
-
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-
-        <v-row class="card-controls">
-          <v-col>
-            <v-card>
-              <v-card-text>
-                <PlaybackControls
-                    :isPlaying="isPlaying"
-                    :enabled="controlsEnabled"
-                    @prev="prevPhrase"
-                    @playPause="togglePlayPause"
-                    @next="nextPhrase"
-                    @restart="restartTrack"
-                />
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
+      <v-card class="pt-9" elevation="0">
+        <PlaybackControls
+            :isPlaying="isPlaying"
+            :isPlayingCurrent="playerStore.isPlayingCurrent"
+            :enabled="controlsEnabled"
+            @prev="prevPhrase"
+            @playPause="togglePlayPause"
+            @next="nextPhrase"
+            @restart="restartTrack"
+        />
+      </v-card>
+    </v-row>
 
 
-      </v-container>
-    </v-main>
-  </v-app>
+  </v-container>
 </template>
 
 <script setup>
@@ -123,7 +107,9 @@ const controlsEnabled = computed(() => {
 .phrase-text {
   font-size: 2em;
 }
-.card-controls {
-  padding-bottom: 50px;
+
+v-container {
+  min-height: 100vh;
 }
+
 </style>

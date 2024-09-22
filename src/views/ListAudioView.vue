@@ -1,47 +1,45 @@
 <template>
-  <v-app>
-    <v-container fluid>
-      <!-- Toolbar -->
-      <v-app-bar
-          app
-          fixed
-          elevation="2"
+  <!-- Content -->
+  <v-container>
+
+    <!-- Toolbar -->
+    <v-app-bar app elevation="1">
+
+      <!-- Title -->
+      <v-toolbar-title>Список записей</v-toolbar-title>
+
+    </v-app-bar>
+
+    <v-pull-to-refresh
+        :pull-down-threshold="64"
+        @load="pullToRefresh"
+    >
+      <v-list
+          lines="two"
+          item-props
       >
-        <!-- Back Button -->
-<!--        <v-btn icon @click="goBack">-->
-<!--          <v-icon>mdi-arrow-left</v-icon>-->
-<!--        </v-btn>-->
+        <v-list-item
+            v-for="track in playlist"
+            :key="track.id"
+            @click="selectTrack(track)"
+            :subtitle="track.n_segments + ' фраз.'"
+        >
+          <template v-slot:prepend>
+            <v-avatar color="grey-lighten-1">
+              <v-icon color="white">mdi-volume-high</v-icon>
+            </v-avatar>
+          </template>
 
-        <!-- Title -->
-        <v-toolbar-title>Список записей</v-toolbar-title>
+          <span class="text-primary">{{ track.title }}</span>
+          <template v-slot:append>
+            {{ toHHMMSS(track.length) }}
+          </template>
 
-      </v-app-bar>
+        </v-list-item>
+      </v-list>
+    </v-pull-to-refresh>
+  </v-container>
 
-      <!-- Content -->
-      <v-main>
-        <v-container>
-          <v-pull-to-refresh
-              :pull-down-threshold="64"
-              @load="pullToRefresh"
-          >
-            <v-list lines="one">
-              <v-list-item
-                  v-for="track in playlist"
-                  :key="track.id"
-                  @click="selectTrack(track)"
-              >
-                {{ track.title }}
-                <template v-slot:append>
-                  {{ toHHMMSS(track.length) }}
-                </template>
-
-              </v-list-item>
-            </v-list>
-          </v-pull-to-refresh>
-        </v-container>
-      </v-main>
-    </v-container>
-  </v-app>
 </template>
 
 <script setup>

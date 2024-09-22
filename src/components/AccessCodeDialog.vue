@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container v-if="store.accessRequired">
     <!-- Modal Dialog -->
     <v-dialog v-model="store.accessRequired" persistent max-width="400">
       <v-card>
