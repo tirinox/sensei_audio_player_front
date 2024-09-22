@@ -14,6 +14,7 @@ export const usePlayerStore = defineStore('player', {
         repeatOne: false,
         isLoadingTrack: false,
         isLoadingPlaylist: false,
+        isPlayingCurrent: false,
     }),
     actions: {
         async fetchPlaylist() {
@@ -104,6 +105,7 @@ export const usePlayerStore = defineStore('player', {
                 onload: () => {
                     console.log('Loaded');
                     this.isLoadingTrack = false;
+                    this.playCurrentPhrase()
                 },
                 onloaderror: (id, error) => {
                     console.error('Error loading track:', error);
@@ -130,13 +132,17 @@ export const usePlayerStore = defineStore('player', {
 
         async prevPhrase() {
             this.currentPhraseIndex = (this.currentPhraseIndex - 1 + this.totalPhrases) % this.totalPhrases;
+
             await this.playCurrentPhrase();
+            this.isPlayingCurrent = false
         },
 
         async nextPhrase(justShift = false) {
             this.currentPhraseIndex = (this.currentPhraseIndex + 1) % this.totalPhrases;
             if(!justShift) {
+
                 await this.playCurrentPhrase();
+                this.isPlayingCurrent = false
             }
         },
 
@@ -152,6 +158,7 @@ export const usePlayerStore = defineStore('player', {
                 this.howler.stop();
                 this.isPlaying = true;
                 this.howler.play(String(this.currentPhraseIndex));
+                this.isPlayingCurrent = true
             }
         }
     },
