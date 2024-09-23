@@ -26,12 +26,20 @@
         :pull-down-threshold="64"
         @load="pullToRefresh"
     >
+      <!-- Text field for filtering -->
+      <v-text-field
+          v-model="search1"
+          label="Поиск по записям..."
+          append-icon="mdi-magnify"
+          clearable
+      ></v-text-field>
+
       <v-list
           lines="two"
           item-props
       >
         <v-list-item
-            v-for="track in playlist"
+            v-for="track in playlistFiltered"
             :key="track.id"
             @click="selectTrack(track)"
             :subtitle="track.n_segments + ' фраз.'"
@@ -46,8 +54,12 @@
           <template v-slot:append>
             {{ toHHMMSS(track.length) }}
           </template>
-
         </v-list-item>
+
+        <v-list-item v-if="playlistFiltered.length === 0">
+          <v-list-item-title>Нет записей</v-list-item-title>
+        </v-list-item>
+
       </v-list>
     </v-pull-to-refresh>
   </v-container>
@@ -55,7 +67,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted} from 'vue';
+import {computed, onMounted, ref} from 'vue';
 import {usePlayerStore} from '../stores/usePlayerStore';
 import router from "@/router/index.js";
 import {toHHMMSS} from "@/helpers/DateHelpers.js";
@@ -64,10 +76,13 @@ import {useAccess} from "@/stores/userProtection.js";
 const accessStore = useAccess()
 const playerStore = usePlayerStore();
 
+const search1 = ref('');
+
 const selectTrack = (track) => {
   playerStore.selectTrack(track);
   router.push('/player');
 };
+
 
 onMounted(() => {
   playerStore.fetchPlaylist();
@@ -79,6 +94,17 @@ const pullToRefresh = async ({done}) => {
   done();
 };
 
-const playlist = computed(() => playerStore.playlist);
+const playlistFiltered = computed(() => {
+try {
+  if (!search1.value) {
+    return playerStore.playlist;
+  } else {
+    const searchQ = search1.value.trim().toLowerCase()
+    return playerStore.playlist.filter(track => track.title.toLowerCase().includes(searchQ));
+  }
+} catch (e) {
+  console.error(e)
+}
+});
 
 </script>

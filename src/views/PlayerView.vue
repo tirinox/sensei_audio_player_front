@@ -11,7 +11,7 @@
       <v-toolbar-title>Проигрыватель</v-toolbar-title>
     </v-app-bar>
 
-    <v-row>
+    <v-row v-if="playerStore.currentTrack">
       <v-col>
         <v-card>
           <v-card-title>
@@ -29,7 +29,6 @@
 
           </v-card-text>
         </v-card>
-
 
       </v-col>
     </v-row>
