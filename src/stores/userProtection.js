@@ -13,6 +13,12 @@ export const useAccess = defineStore('userAccess', {
         accessCode: window.localStorage.getItem(LOCAL_STORAGE_KEY) || '',
     }),
     actions: {
+        _saveAccessCode(accessCode) {
+            this.accessCode = accessCode;
+            // save to local storage
+            window.localStorage.setItem(LOCAL_STORAGE_KEY, accessCode);
+        },
+
         validateAccessCode(accessCode) {
             return clearAccessCode(accessCode) === CODE;
         },
@@ -20,13 +26,14 @@ export const useAccess = defineStore('userAccess', {
         submitAccessCode(accessCode) {
             accessCode = clearAccessCode(accessCode);
             if(accessCode === CODE) {
-                this.accessCode = accessCode;
-                // save to local storage
-                window.localStorage.setItem(LOCAL_STORAGE_KEY, accessCode);
-
+                this._saveAccessCode(accessCode);
                 return true;
             }
         },
+
+        exit() {
+            this._saveAccessCode('');
+        }
     },
     getters: {
         accessGranted() {
