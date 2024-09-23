@@ -1,14 +1,31 @@
 <template>
-  <v-progress-linear :value="progress" height="10"></v-progress-linear>
+  <v-slider
+      v-model="model1"
+      height="10"
+      :max="duration"
+      :min="1"
+      :step="1"
+      color="blue-lighten-1"
+      thumb-label
+      class="mt-1 mb-1"
+
+      v-if="!props.isLoading"
+  ></v-slider>
+  <v-progress-linear
+      indeterminate height="10" class="mt-1 mb-1"
+      color="blue-lighten-1" rounded v-else
+  ></v-progress-linear>
 </template>
 
 <script setup>
-import {computed} from 'vue';
 
+const model1 = defineModel()
+
+// Define props
 const props = defineProps({
-  currentTime: {
-    type: Number,
-    required: true,
+  isLoading: {
+    type: Boolean,
+    default: false
   },
   duration: {
     type: Number,
@@ -16,16 +33,8 @@ const props = defineProps({
   },
 });
 
-const progress = computed(() => {
-  if (props.duration > 0) {
-    return ((props.currentTime / props.duration) * 100).toFixed(2);
-  }
-  return 0;
-});
 </script>
 
 <style scoped>
-v-ons-progress-bar {
-  margin: 16px;
-}
+
 </style>

@@ -53,13 +53,6 @@ defineProps({
 
 <style scoped>
 .controls {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 20px;
-}
-
-v-ons-button {
-  width: 50px;
-  height: 50px;
+  padding: 0 !important;
 }
 </style>

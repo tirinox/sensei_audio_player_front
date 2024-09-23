@@ -8,7 +8,7 @@ export const usePlayerStore = defineStore('player', {
     state: () => ({
         playlist: [],
         currentTrack: null,
-        currentPhraseIndex: 0,
+        currentPhraseIndex: 1,
         isPlaying: false,
         howler: null,
         repeatOne: false,
@@ -79,14 +79,14 @@ export const usePlayerStore = defineStore('player', {
                 return;
             }
             const tr = await this.fetchTrack(track.id);
-            this.currentPhraseIndex = 0;
+            this.currentPhraseIndex = 1;
             this.isPlaying = false;
             if (this.howler) {
                 this.howler.unload();
             }
             const sprites = {}
 
-            let i = 0
+            let i = 1
             for (const segment of Object.values(tr.segments)) {
                 sprites[i] = [segment.start, segment.end - segment.start];
                 i++;
@@ -131,40 +131,55 @@ export const usePlayerStore = defineStore('player', {
         },
 
         async prevPhrase() {
-            this.currentPhraseIndex = (this.currentPhraseIndex - 1 + this.totalPhrases) % this.totalPhrases;
+            this.currentPhraseIndex -= 1
+            if (this.currentPhraseIndex < 1) {
+                this.currentPhraseIndex = this.totalPhrases;
+            }
 
             await this.playCurrentPhrase();
             this.isPlayingCurrent = false
         },
 
         async nextPhrase(justShift = false) {
-            this.currentPhraseIndex = (this.currentPhraseIndex + 1) % this.totalPhrases;
-            if(!justShift) {
+            this.currentPhraseIndex += 1;
+            if (this.currentPhraseIndex > this.totalPhrases) {
+                this.currentPhraseIndex = 1;
+            }
 
+            if(!justShift) {
                 await this.playCurrentPhrase();
                 this.isPlayingCurrent = false
             }
         },
 
         async restartTrack() {
-            this.currentPhraseIndex = 0;
+            this.currentPhraseIndex = 1;
             await this.playCurrentPhrase();
         },
 
         async playCurrentPhrase() {
             const phrase = this.currentPhrase;
             if (phrase) {
-                console.info(`Playing phrase ${this.currentPhraseIndex + 1}/${this.totalPhrases}: ${phrase.text}`);
+                console.info(`Playing phrase ${this.currentPhraseIndex}/${this.totalPhrases}: ${phrase.text}`);
                 this.howler.stop();
                 this.isPlaying = true;
                 this.howler.play(String(this.currentPhraseIndex));
                 this.isPlayingCurrent = true
             }
+        },
+
+        setPhrase(phraseIndex) {
+            console.log('Set phrase:', phraseIndex)
+            this.currentPhraseIndex = phraseIndex
+            if(this.isPlaying) {
+                this.howler.stop();
+                this.isPlaying = false;
+            }
         }
     },
     getters: {
         currentPhrase() {
-            return this.currentTrack.segments[this.currentPhraseIndex];
+            return this.currentTrack.segments[this.currentPhraseIndex - 1];
         },
         totalPhrases() {
             return this.currentTrack.segments.length
