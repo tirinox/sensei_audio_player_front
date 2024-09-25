@@ -74,10 +74,11 @@ export const usePlayerStore = defineStore('player', {
 
         async selectTrack(track) {
             this.isLoadingTrack = true;
-            if(track.id === this.currentTrack.id) {
-                console.info('Track already selected');
-                return;
-            }
+
+            // if(track.id === this.currentTrack.id) {
+            //     console.info('Track already selected');
+            //     return;
+            // }
             const tr = await this.fetchTrack(track.id);
             this.currentPhraseIndex = 1;
             this.isPlaying = false;
@@ -93,6 +94,7 @@ export const usePlayerStore = defineStore('player', {
             }
 
             const audioFile = `${BASE_PATH}/${tr.audio_file}`
+
             console.log('Will load track:', audioFile);
             this.howler = new Howl({
                 src: [audioFile],
@@ -111,6 +113,11 @@ export const usePlayerStore = defineStore('player', {
                     console.error('Error loading track:', error);
                     this.isLoadingTrack = false;
                 },
+                onplayerror: (id, error) => {
+                    console.error('Error playing track:', error);
+                    this.isLoadingTrack = false;
+                }
+
             });
         },
 
