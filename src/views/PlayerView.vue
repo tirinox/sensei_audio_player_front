@@ -19,12 +19,18 @@
           </v-card-title>
           <v-card-text>
 
-            <p v-html="playerStore.currentPhrase.text" class="phrase-text pb-2"></p>
+            <KaraokeText
+                :current-index="playerStore.currentPhraseIndex"
+                :phrases="playerStore.currentTrack.segments"
+                v-if="playerStore.currentTrack"
+            ></KaraokeText>
+
             <ProgressBar
                 :duration="playerStore.totalPhrases"
                 :is-loading="playerStore.isLoading"
                 v-model="progress"
             />
+
             <p>{{ currentPhraseIndex }} / {{ playerStore.totalPhrases }}</p>
 
           </v-card-text>
@@ -64,6 +70,7 @@ import {usePlayerStore} from '../stores/usePlayerStore';
 // import KaraokeText from '../components/KaraokeText.vue';
 import ProgressBar from '../components/ProgressBar.vue';
 import PlaybackControls from '../components/PlaybackControls.vue';
+import KaraokeText from "@/components/KaraokeText.vue";
 
 const playerStore = usePlayerStore();
 const router = useRouter();
@@ -108,8 +115,4 @@ const controlsEnabled = computed(() => {
 </script>
 
 <style scoped>
-.phrase-text {
-  font-size: 2em;
-}
-
 </style>
