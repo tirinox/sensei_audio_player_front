@@ -123,17 +123,26 @@ export const usePlayerStore = defineStore('player', {
 
         async togglePlayPause() {
             if (this.isPlaying) {
-                this.isPlaying = false;
-                this.howler.pause();
+                await this.stop();
             } else {
                 await this.playCurrentPhrase();
             }
         },
 
+        async stop() {
+            this.isPlaying = false;
+            this.howler.pause();
+        },
+
+        async repeatCurrent() {
+            await this.stop()
+            await this.playCurrentPhrase();
+        },
+
         async endPlay() {
             this.isPlaying = false;
             if(this.repeatOne) {
-                this.nextPhrase(true)
+                await this.nextPhrase(true)
             }
         },
 

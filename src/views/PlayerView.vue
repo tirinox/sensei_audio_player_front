@@ -63,7 +63,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted} from 'vue';
+import {computed, onBeforeUnmount, onMounted} from 'vue';
 import {useRouter} from 'vue-router';
 import {usePlayerStore} from '../stores/usePlayerStore';
 
@@ -106,11 +106,26 @@ const progress = computed({
 
 // on mount if there is no track selected then redirect to the list
 onMounted(() => {
+  window.addEventListener('keydown', keyDownHandler);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', keyDownHandler);
 });
 
 const controlsEnabled = computed(() => {
   return !!(playerStore.currentTrack && !playerStore.isLoading)
 });
+
+const keyDownHandler = (event) => {
+  if (event.key === ' ') {
+    playerStore.playCurrentPhrase()
+  } else if (event.key === 'ArrowLeft') {
+    prevPhrase();
+  } else if (event.key === 'ArrowRight') {
+    nextPhrase();
+  }
+};
 
 </script>
 
