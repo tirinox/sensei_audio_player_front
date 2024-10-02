@@ -12,6 +12,9 @@
       <v-menu activator="#menu-activator">
         <v-list>
           <v-list-item>
+            <v-list-item-title @click="playerStore.fetchPlaylist()">Обновить</v-list-item-title>
+          </v-list-item>
+          <v-list-item>
             <v-list-item-title @click="accessStore.exit()">Выход</v-list-item-title>
           </v-list-item>
         </v-list>
@@ -22,17 +25,19 @@
 
     </v-app-bar>
 
+    <!-- Text field for filtering -->
+    <v-text-field
+        v-model="search1"
+        label="Поиск по записям..."
+        append-icon="mdi-magnify"
+        clearable
+    ></v-text-field>
+
+
     <v-pull-to-refresh
         :pull-down-threshold="64"
         @load="pullToRefresh"
     >
-      <!-- Text field for filtering -->
-      <v-text-field
-          v-model="search1"
-          label="Поиск по записям..."
-          append-icon="mdi-magnify"
-          clearable
-      ></v-text-field>
 
       <v-list
           lines="two"
@@ -95,16 +100,16 @@ const pullToRefresh = async ({done}) => {
 };
 
 const playlistFiltered = computed(() => {
-try {
-  if (!search1.value) {
-    return playerStore.playlist;
-  } else {
-    const searchQ = search1.value.trim().toLowerCase()
-    return playerStore.playlist.filter(track => track.title.toLowerCase().includes(searchQ));
+  try {
+    if (!search1.value) {
+      return playerStore.playlist;
+    } else {
+      const searchQ = search1.value.trim().toLowerCase()
+      return playerStore.playlist.filter(track => track.title.toLowerCase().includes(searchQ));
+    }
+  } catch (e) {
+    console.error(e)
   }
-} catch (e) {
-  console.error(e)
-}
 });
 
 </script>

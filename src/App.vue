@@ -18,6 +18,13 @@ import AccessCodeDialog from "@/components/AccessCodeDialog.vue";
   </v-app>
 </template>
 
-<style scoped>
+<style>
+
+html, body, #app {
+  height: 100%;
+  overflow-x: hidden; /* Prevents horizontal scrolling */
+  overflow-y: auto; /* Ensures vertical scrolling */
+  -webkit-overflow-scrolling: touch; /* Enables smooth scrolling on iOS */
+}
 
 </style>
