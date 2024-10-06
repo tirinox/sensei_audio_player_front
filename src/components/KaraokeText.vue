@@ -1,18 +1,15 @@
 <template>
   <div class="karaoke-text pb-2">
-    <v-row>
-      <v-col cols="auto" class="d-flex flex-column justify-center">
-        <v-btn
-            :icon="showText ? 'mdi-eye-off' : 'mdi-eye'"
-            @click="showText = !showText"
-            density="comfortable"
-            variant="text"
-        ></v-btn>
-      </v-col>
-      <v-col>
-        <p v-html="currentPhrase" class="phrase-text" v-show="showText"></p>
-      </v-col>
-    </v-row>
+    <p class="phrase-text">
+      <span v-html="currentPhrase" v-if="showText"></span>
+      <span v-else>...</span>
+      <v-btn
+          :icon="showText ? 'mdi-eye-off' : 'mdi-eye'"
+          @click="showText = !showText"
+          density="comfortable"
+          variant="text"
+      ></v-btn>
+    </p>
 
     <!--    <p v-html="previousPhrase" class="blurry"></p>-->
     <!--    <p v-html="nextPhrase" class="blurry"></p>-->
