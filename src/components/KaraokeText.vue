@@ -1,14 +1,30 @@
 <template>
   <div class="karaoke-text pb-2">
-<!--    <p v-html="previousPhrase" class="blurry"></p>-->
-    <p v-html="currentPhrase" class="phrase-text"></p>
-<!--    <p v-html="nextPhrase" class="blurry"></p>-->
+    <v-row>
+      <v-col cols="auto" class="d-flex flex-column justify-center">
+        <v-btn
+            :icon="showText ? 'mdi-eye-off' : 'mdi-eye'"
+            @click="showText = !showText"
+            density="comfortable"
+            variant="text"
+        ></v-btn>
+      </v-col>
+      <v-col>
+        <p v-html="currentPhrase" class="phrase-text" v-show="showText"></p>
+      </v-col>
+    </v-row>
+
+    <!--    <p v-html="previousPhrase" class="blurry"></p>-->
+    <!--    <p v-html="nextPhrase" class="blurry"></p>-->
+
   </div>
 </template>
 
 <script setup>
-import {computed} from 'vue';
+import {computed, ref} from 'vue';
 import {parenthesesToRuby} from "@/helpers/Nihongo.js";
+
+const showText = ref(true);
 
 const props = defineProps({
   phrases: {

@@ -8,17 +8,13 @@
       <v-btn icon @click="goBack">
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
-      <v-toolbar-title>Проигрыватель</v-toolbar-title>
+      <v-toolbar-title>{{ playerStore.currentTrack ? playerStore.currentTrack.title : 'Проигрыватель' }}</v-toolbar-title>
     </v-app-bar>
 
     <v-row v-if="playerStore.currentTrack">
       <v-col>
         <v-card>
-          <v-card-title>
-            <h2>{{ playerStore.currentTrack ? playerStore.currentTrack.title : 'Нет записи' }}</h2>
-          </v-card-title>
           <v-card-text>
-
             <KaraokeText
                 :current-index="playerStore.currentPhraseIndex"
                 :phrases="playerStore.currentTrack.segments"
