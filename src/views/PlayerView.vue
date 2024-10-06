@@ -74,7 +74,6 @@ const router = useRouter();
 const currentPhraseIndex = computed(() => playerStore.currentPhraseIndex);
 const isPlaying = computed(() => playerStore.isPlaying);
 
-
 const goBack = () => {
   router.push('/');
 };
@@ -95,9 +94,22 @@ const restartTrack = () => {
   playerStore.restartTrack();
 };
 
+const st = {
+  scrollTimeout: null,
+}
+
 const progress = computed({
   get: () => playerStore.currentPhraseIndex,
-  set: (value) => playerStore.setPhrase(Math.round(value))
+  set: (value) => {
+    playerStore.setPhrase(Math.round(value))
+    // after some time play current phrase
+    if (st.scrollTimeout) {
+      clearTimeout(st.scrollTimeout);
+    }
+    st.scrollTimeout = setTimeout(() => {
+      playerStore.playCurrentPhrase()
+    }, 300)
+  }
 });
 
 // on mount if there is no track selected then redirect to the list
