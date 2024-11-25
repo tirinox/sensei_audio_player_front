@@ -27,7 +27,7 @@
 
     <!-- Text field for filtering -->
     <v-text-field
-        v-model="search1"
+        v-model="trackListStore.searchQuery"
         label="Поиск по записям..."
         append-icon="mdi-magnify"
         clearable
@@ -72,16 +72,17 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue';
+import {computed, onMounted} from 'vue';
 import {usePlayerStore} from '../stores/usePlayerStore';
 import router from "@/router/index.js";
 import {toHHMMSS} from "@/helpers/DateHelpers.js";
 import {useAccess} from "@/stores/userProtection.js";
+import {useTrackList} from "@/stores/useTrackList.js";
 
 const accessStore = useAccess()
 const playerStore = usePlayerStore();
 
-const search1 = ref('');
+const trackListStore = useTrackList();
 
 const selectTrack = (track) => {
   playerStore.selectTrack(track);
@@ -101,10 +102,10 @@ const pullToRefresh = async ({done}) => {
 
 const playlistFiltered = computed(() => {
   try {
-    if (!search1.value) {
+    if (!trackListStore.searchQuery) {
       return playerStore.playlist;
     } else {
-      const searchQ = search1.value.trim().toLowerCase()
+      const searchQ = trackListStore.searchQuery.trim().toLowerCase()
       return playerStore.playlist.filter(track => track.title.toLowerCase().includes(searchQ));
     }
   } catch (e) {
