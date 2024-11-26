@@ -75,6 +75,7 @@ const currentPhraseIndex = computed(() => playerStore.currentPhraseIndex);
 const isPlaying = computed(() => playerStore.isPlaying);
 
 const goBack = () => {
+  playerStore.stop()
   router.push('/');
 };
 
