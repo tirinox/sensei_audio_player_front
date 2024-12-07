@@ -4,6 +4,7 @@ import {Howl} from 'howler';
 const BASE_PATH = import.meta.env.PROD ? '/audio_db' : '/test';
 console.info('Audio base path:', BASE_PATH);
 
+
 export const usePlayerStore = defineStore('player', {
     state: () => ({
         playlist: [],
@@ -31,7 +32,7 @@ export const usePlayerStore = defineStore('player', {
                     track.title = track.audio_file;
                 });
                 this.playlist = playlist;
-                if(this.playlist.length > 0) {
+                if (this.playlist.length > 0) {
                     await this.fetchTrack(0)
                 }
                 console.info(`Playlist: ${this.playlist.length}`)
@@ -55,7 +56,7 @@ export const usePlayerStore = defineStore('player', {
 
                 const newSegments = []
                 let i = 1
-                for(let s of Object.values(t.segments)) {
+                for (let s of Object.values(t.segments)) {
                     newSegments.push({
                         ...s,
                         id: i,
@@ -141,7 +142,7 @@ export const usePlayerStore = defineStore('player', {
 
         async endPlay() {
             this.isPlaying = false;
-            if(this.repeatOne) {
+            if (this.repeatOne) {
                 await this.nextPhrase(true)
             }
         },
@@ -162,7 +163,7 @@ export const usePlayerStore = defineStore('player', {
                 this.currentPhraseIndex = 1;
             }
 
-            if(!justShift) {
+            if (!justShift) {
                 await this.playCurrentPhrase();
                 this.isPlayingCurrent = false
             }
@@ -181,17 +182,81 @@ export const usePlayerStore = defineStore('player', {
                 this.isPlaying = true;
                 this.howler.play(String(this.currentPhraseIndex));
                 this.isPlayingCurrent = true
+
+                this.setMediaMetadata()
+            }
+        },
+
+        setMediaMetadata() {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: this.currentPhrase.text,
+                    artist: "Japanese Audio Player",
+                    album: this.currentTrack.title,
+                    artwork: [
+                        {src: 'icon-192.png', sizes: '192x192', type: 'image/png'},
+                        // {src: playerStore.currentTrack.cover, sizes: '128x128', type: 'image/png'},
+                        // {src: playerStore.currentTrack.cover, sizes: '192x192', type: 'image/png'},
+                        // {src: playerStore.currentTrack.cover, sizes: '256x256', type: 'image/png'},
+                        // {src: playerStore.currentTrack.cover, sizes: '384x384', type: 'image/png'},
+                        // {src: playerStore.currentTrack.cover, sizes: '512x512', type: 'image/png'},
+                    ]
+                });
+            }
+        },
+
+        clearMediaSession() {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = null;
+                navigator.mediaSession.setActionHandler('play', null);
+                navigator.mediaSession.setActionHandler('pause', null);
+                navigator.mediaSession.setActionHandler('previoustrack', null);
+                navigator.mediaSession.setActionHandler('nexttrack', null);
+            }
+        },
+
+        setupMediaSession() {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: this.currentPhrase.text,
+                    artist: "Japanese Audio Player",
+                    album: this.currentTrack.title,
+                    artwork: [
+                        {src: 'icon-192.png', sizes: '192x192', type: 'image/png'},
+                        // {src: playerStore.currentTrack.cover, sizes: '128x128', type: 'image/png'},
+                        // {src: playerStore.currentTrack.cover, sizes: '192x192', type: 'image/png'},
+                        // {src: playerStore.currentTrack.cover, sizes: '256x256', type: 'image/png'},
+                        // {src: playerStore.currentTrack.cover, sizes: '384x384', type: 'image/png'},
+                        // {src: playerStore.currentTrack.cover, sizes: '512x512', type: 'image/png'},
+                    ]
+                });
+
+                navigator.mediaSession.setActionHandler('play', () => {
+                    this.playCurrentPhrase()
+                });
+
+                navigator.mediaSession.setActionHandler('pause', () => {
+                    this.stop()
+                });
+
+                navigator.mediaSession.setActionHandler('previoustrack', () => {
+                    this.prevPhrase()
+                });
+
+                navigator.mediaSession.setActionHandler('nexttrack', () => {
+                    this.nextPhrase()
+                });
             }
         },
 
         setPhrase(phraseIndex) {
             console.log('Set phrase:', phraseIndex)
             this.currentPhraseIndex = phraseIndex
-            if(this.isPlaying) {
+            if (this.isPlaying) {
                 this.howler.stop();
                 this.isPlaying = false;
             }
-        }
+        },
     },
     getters: {
         currentPhrase() {

@@ -113,13 +113,16 @@ const progress = computed({
   }
 });
 
+
 // on mount if there is no track selected then redirect to the list
 onMounted(() => {
   window.addEventListener('keydown', keyDownHandler);
+  playerStore.setupMediaSession()
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', keyDownHandler);
+  playerStore.clearMediaSession()
 });
 
 const controlsEnabled = computed(() => {
