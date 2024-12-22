@@ -91,13 +91,12 @@ const selectTrack = (track) => {
 
 
 onMounted(() => {
-  playerStore.fetchPlaylist();
+  accessStore.loadOnStart()
 });
 
 
 const pullToRefresh = async ({done}) => {
-  await playerStore.fetchPlaylist();
-  done();
+  accessStore.loadOnStart().then(() => done());
 };
 
 const playlistFiltered = computed(() => {
@@ -110,6 +109,7 @@ const playlistFiltered = computed(() => {
     }
   } catch (e) {
     console.error(e)
+    return []
   }
 });
 

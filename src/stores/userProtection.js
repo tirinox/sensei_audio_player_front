@@ -1,8 +1,8 @@
 import {defineStore} from 'pinia';
+import {usePlayerStore} from "@/stores/usePlayerStore.js";
 
 
 const LOCAL_STORAGE_KEY = 'userAccessCode';
-const CODE = 'JPXLR'
 
 function clearAccessCode(code) {
     return code.trim().toUpperCase();
@@ -11,6 +11,7 @@ function clearAccessCode(code) {
 export const useAccess = defineStore('userAccess', {
     state: () => ({
         accessCode: window.localStorage.getItem(LOCAL_STORAGE_KEY) || '',
+        accessGranted: false,
     }),
     actions: {
         _saveAccessCode(accessCode) {
@@ -19,26 +20,30 @@ export const useAccess = defineStore('userAccess', {
             window.localStorage.setItem(LOCAL_STORAGE_KEY, accessCode);
         },
 
-        validateAccessCode(accessCode) {
-            return clearAccessCode(accessCode) === CODE;
+        async submitAccessCode(accessCode) {
+            accessCode = clearAccessCode(accessCode);
+
+            const playerStore = usePlayerStore();
+            const result = await playerStore.fetchPlaylist(accessCode);
+            if(result) {
+                this._saveAccessCode(accessCode);
+                this.accessGranted = true;
+            }
+            return result;
         },
 
-        submitAccessCode(accessCode) {
-            accessCode = clearAccessCode(accessCode);
-            if(accessCode === CODE) {
-                this._saveAccessCode(accessCode);
-                return true;
+        async loadOnStart() {
+            if(this.accessCode) {
+                await this.submitAccessCode(this.accessCode);
             }
         },
 
         exit() {
             this._saveAccessCode('');
+            this.accessGranted = false;
         }
     },
     getters: {
-        accessGranted() {
-            return this.accessCode === CODE;
-        },
         accessRequired() {
             return !this.accessGranted;
         }
