@@ -28,7 +28,12 @@ export const usePlayerStore = defineStore('player', {
                 console.info('Fetching playlist:', indexFile);
                 const response = await fetch(indexFile);
                 const data = await response.json();
+
+
                 let playlist = data.files;
+                // reverse order in the playlist
+                playlist = playlist.reverse();
+
                 console.log(playlist)
 
                 // set id for each track
