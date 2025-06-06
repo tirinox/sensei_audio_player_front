@@ -1,5 +1,5 @@
 <template>
-  <div class="karaoke-text pb-2">
+  <div class="karaoke-text pb-2 mt-5">
     <p class="phrase-text">
       <span v-html="currentPhrase" v-if="showText"></span>
       <span v-else>...</span>
