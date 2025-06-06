@@ -18,6 +18,7 @@ export const usePlayerStore = defineStore('player', {
         isLoadingPlaylist: false,
         isPlayingCurrent: false,
         _currentCode: '',
+        _playbackRate: +window.localStorage.getItem('playbackRate') || 1.0,
     }),
     actions: {
         async fetchPlaylist(code) {
@@ -28,7 +29,6 @@ export const usePlayerStore = defineStore('player', {
                 console.info('Fetching playlist:', indexFile);
                 const response = await fetch(indexFile);
                 const data = await response.json();
-
 
                 let playlist = data.files;
                 // reverse order in the playlist
@@ -133,7 +133,6 @@ export const usePlayerStore = defineStore('player', {
                     console.error('Error playing track:', error);
                     this.isLoadingTrack = false;
                 }
-
             });
         },
 
@@ -150,11 +149,6 @@ export const usePlayerStore = defineStore('player', {
             if(this._howler) {
                 this._howler.pause();
             }
-        },
-
-        async repeatCurrent() {
-            await this.stop()
-            await this.playCurrentPhrase();
         },
 
         async endPlay() {
@@ -274,6 +268,18 @@ export const usePlayerStore = defineStore('player', {
                 this.isPlaying = false;
             }
         },
+
+        setRatePlaybackRate(rate) {
+            if (this._howler) {
+                this._playbackRate = rate
+                window.localStorage.setItem('playbackRate', rate);
+                this._howler.rate(rate);
+                console.info(`setRatePlaybackRate: Playback rate set to ${rate}`);
+                this.playCurrentPhrase()
+            } else {
+                console.error('setRatePlaybackRate: Howler instance is not initialized');
+            }
+        }
     },
     getters: {
         currentPhrase() {
@@ -287,6 +293,9 @@ export const usePlayerStore = defineStore('player', {
         },
         _dbBaseURL() {
             return`${BASE_PATH}/${this._currentCode}`
+        },
+        playbackRate() {
+            return this._playbackRate;
         }
     },
 })

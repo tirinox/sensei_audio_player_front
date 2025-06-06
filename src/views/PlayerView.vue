@@ -18,6 +18,7 @@
             <v-col>
                 <v-card>
                     <v-card-text>
+                        <div>{{ currentPhraseIndex }} / {{ playerStore.totalPhrases }}</div>
                         <KaraokeText
                             :current-index="playerStore.currentPhraseIndex"
                             :phrases="playerStore.currentTrack.segments"
@@ -30,7 +31,21 @@
                             v-model="progress"
                         />
 
-                        <p>{{ currentPhraseIndex }} / {{ playerStore.totalPhrases }}</p>
+
+                        <v-row class="d-flex justify-left">
+                            <div class="ml-2">Скорость речи:</div>
+                            <v-btn
+                                v-for="rate in [0.5, 0.75, 1, 1.25]"
+                                :key="rate"
+                                variant="text"
+                                size="s"
+                                @click="playerStore.setRatePlaybackRate(rate)"
+                                :color="playerStore.playbackRate === rate ? 'primary' : 'default'"
+                                class="ml-1"
+                            >
+                                {{ rate }}x
+                            </v-btn>
+                        </v-row>
 
                     </v-card-text>
                 </v-card>
@@ -118,6 +133,11 @@ const progress = computed({
 
 // on mount if there is no track selected then redirect to the list
 onMounted(() => {
+    if (!playerStore.currentTrack) {
+        router.push('/');
+        return
+    }
+
     window.addEventListener('keydown', keyDownHandler);
     playerStore.setupMediaSession()
 });

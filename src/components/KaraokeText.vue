@@ -10,10 +10,6 @@
           variant="text"
       ></v-btn>
     </p>
-
-    <!--    <p v-html="previousPhrase" class="blurry"></p>-->
-    <!--    <p v-html="nextPhrase" class="blurry"></p>-->
-
   </div>
 </template>
 
