@@ -297,6 +297,11 @@ export const usePlayerStore = defineStore('player', {
         },
         playbackRate() {
             return this._playbackRate;
-        }
+        },
+        title() {
+            const title = this.currentTrack ? this.currentTrack.title : 'Проигрыватель'
+            // remove "lb_" from the beginning of the title
+            return title.replace(/^lb_/, '').trim();
+        },
     },
 })

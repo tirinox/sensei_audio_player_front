@@ -8,9 +8,7 @@
             <v-btn icon @click="goBack">
                 <v-icon>mdi-arrow-left</v-icon>
             </v-btn>
-            <v-toolbar-title>{{
-                    playerStore.currentTrack ? playerStore.currentTrack.title : 'Проигрыватель'
-                }}
+            <v-toolbar-title>{{ playerStore.title }}
             </v-toolbar-title>
         </v-app-bar>
 
@@ -18,7 +16,6 @@
             <v-col>
                 <v-card>
                     <v-card-text>
-                        <div>{{ currentPhraseIndex }} / {{ playerStore.totalPhrases }}</div>
                         <KaraokeText
                             :current-index="playerStore.currentPhraseIndex"
                             :phrases="playerStore.currentTrack.segments"
