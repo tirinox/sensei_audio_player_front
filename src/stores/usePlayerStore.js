@@ -134,6 +134,7 @@ export const usePlayerStore = defineStore('player', {
                     this.isLoadingTrack = false;
                 }
             });
+            this._howler.rate(this._playbackRate);
         },
 
         async togglePlayPause() {
