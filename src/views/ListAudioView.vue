@@ -72,7 +72,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted} from 'vue';
+import {computed} from 'vue';
 import {usePlayerStore} from '../stores/usePlayerStore';
 import router from "@/router/index.js";
 import {toHHMMSS} from "@/helpers/DateHelpers.js";
@@ -88,11 +88,6 @@ const selectTrack = (track) => {
   playerStore.selectTrack(track);
   router.push('/player');
 };
-
-
-onMounted(() => {
-  accessStore.loadOnStart()
-});
 
 
 const pullToRefresh = async ({done}) => {

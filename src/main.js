@@ -15,11 +15,9 @@ import { VPullToRefresh } from 'vuetify/labs/VPullToRefresh'
 
 const app = createApp(App)
 
-
 app.use(createPinia())
 app.use(router)
 app.use(createVuetify({
-
     theme: {
         defaultTheme: 'light',
     },

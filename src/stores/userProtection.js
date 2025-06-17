@@ -1,5 +1,6 @@
 import {defineStore} from 'pinia';
 import {usePlayerStore} from "@/stores/usePlayerStore.js";
+import router from "@/router/index.js";
 
 
 const LOCAL_STORAGE_KEY = 'userAccessCode';
@@ -12,6 +13,7 @@ export const useAccess = defineStore('userAccess', {
     state: () => ({
         accessCode: window.localStorage.getItem(LOCAL_STORAGE_KEY) || '',
         accessGranted: false,
+        isLoading: true,
     }),
     actions: {
         _saveAccessCode(accessCode) {
@@ -21,31 +23,47 @@ export const useAccess = defineStore('userAccess', {
         },
 
         async submitAccessCode(accessCode) {
-            accessCode = clearAccessCode(accessCode);
-
-            const playerStore = usePlayerStore();
-            const result = await playerStore.fetchPlaylist(accessCode);
-            if(result) {
-                this._saveAccessCode(accessCode);
-                this.accessGranted = true;
+            this.isLoading = true;
+            console.log(`Submitting access code: ${accessCode}`);
+            try {
+                const playerStore = usePlayerStore();
+                accessCode = clearAccessCode(accessCode);
+                const result = await playerStore.fetchPlaylist(accessCode);
+                if (result) {
+                    this._saveAccessCode(accessCode);
+                    this.accessGranted = true;
+                    // redirect to player page
+                    router.replace({ name: 'playlist' })
+                }
+                return result;
             }
-            return result;
+            finally {
+                this.isLoading = false;
+                console.log(`Access code submission completed: ${accessCode}`);
+            }
         },
 
         async loadOnStart() {
             if(this.accessCode) {
                 await this.submitAccessCode(this.accessCode);
+            } else {
+                this.isLoading = false;
+                this.accessGranted = false;
             }
         },
 
         exit() {
             this._saveAccessCode('');
             this.accessGranted = false;
+            router.replace({ name: 'login' })
         }
     },
     getters: {
         accessRequired() {
             return !this.accessGranted;
-        }
+        },
+        loginWindowVisible() {
+            return this.accessRequired && !this.isLoading;
+        },
     },
 })
