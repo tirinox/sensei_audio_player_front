@@ -46,19 +46,6 @@ const currentPhrase = computed(() => {
     return parenthesesToRuby(props.phrases[props.currentIndex - 1].text)
 });
 
-// const previousPhrase = computed(() => {
-//   if (props.currentIndex > 1) {
-//     return props.phrases[props.currentIndex - 2].text;
-//   }
-//   return '';
-// });
-//
-// const nextPhrase = computed(() => {
-//   if (props.currentIndex < props.phrases.length) {
-//     return props.phrases[props.currentIndex].text;
-//   }
-//   return '';
-// });
 </script>
 
 <style scoped>
