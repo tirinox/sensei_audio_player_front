@@ -1,72 +1,31 @@
 import {defineStore} from 'pinia';
 import {Howl} from 'howler';
-
-// const BASE_PATH = import.meta.env.PROD ? '/audio_db' : '/test';
-const BASE_PATH = '/audio_db'
-console.info('Audio base path:', BASE_PATH);
+import {useTrackList} from "@/stores/useTrackList.js";
 
 
 export const usePlayerStore = defineStore('player', {
     state: () => ({
-        playlist: [],
         currentTrack: null,
         currentPhraseIndex: 1,
         isPlaying: false,
         _howler: null,
         repeatOne: false,
         isLoadingTrack: false,
-        isLoadingPlaylist: false,
         isPlayingCurrent: false,
-        _currentCode: '',
         _playbackRate: +window.localStorage.getItem('playbackRate') || 1.0,
     }),
     actions: {
-        async fetchPlaylist(code) {
+        async fetchTrack(track) {
             try {
-                this._currentCode = code;
-                this.isLoadingPlaylist = true;
-                const indexFile = `${this._dbBaseURL}/index.json?r=${Math.random()}`
-                console.info('Fetching playlist:', indexFile);
-                const response = await fetch(indexFile);
-                const data = await response.json();
-
-                let playlist = data.files;
-                // reverse order in the playlist
-                playlist = playlist.reverse();
-
-                console.log(playlist)
-
-                // set id for each track
-                playlist.forEach((track, index) => {
-                    track.id = index;
-                    track.title = track.audio_file;
-                });
-                this.playlist = playlist;
-                if (this.playlist.length > 0) {
-                    await this.fetchTrack(0)
-                }
-                console.info(`Playlist: ${this.playlist.length}`)
-                return true
-            } catch (error) {
-                console.error('Error fetching playlist:', error);
-                return false
-            } finally {
-                this.isLoadingPlaylist = false;
-            }
-        },
-
-        async fetchTrack(id) {
-            try {
-                const desc = this.playlist[id]
-                const segmentFile = desc['segment_file']
-                const audioFile = desc['audio_file']
-                const metaFile = `${this._dbBaseURL}/${segmentFile}?r=${Math.random()}`;
+                const segmentFile = track['segment_file']
+                const audioFile = track['audio_file']
+                const metaFile = `${this.currentDbBaseURL}/${segmentFile}?r=${Math.random()}`;
                 console.info('Fetching track:', metaFile);
                 const response = await fetch(metaFile);
                 const t = await response.json();
 
-                Object.assign(t, desc)
-                t.title = desc['title'] || audioFile;
+                Object.assign(t, track)
+                t.title = track['title'] || audioFile;
 
                 const newSegments = []
                 let i = 1
@@ -83,16 +42,17 @@ export const usePlayerStore = defineStore('player', {
                 console.info(`Track: ${t.title} (${t.filename}) contains ${t.total_segments} phrases`);
                 return t
             } catch (error) {
-                console.error('Error fetching track:', error);
+                console.error('Error fetching track:');
+                console.error(error);
             }
         },
 
         async selectTrack(track) {
             this.isLoadingTrack = true;
 
-            const tr = await this.fetchTrack(track.id);
+            const tr = await this.fetchTrack(track);
             if(!tr) {
-                console.error(`Error fetching track ${track.id}`);
+                console.error(`Error fetching track ${track.title}`);
                 return;
             }
 
@@ -109,32 +69,36 @@ export const usePlayerStore = defineStore('player', {
                 i++;
             }
 
-            const audioFile = `${this._dbBaseURL}/${tr.audio_file}`
+            const audioFile = `${this.currentDbBaseURL}/${tr.audio_file}`
 
             console.log('Will load track:', audioFile);
             this._howler = new Howl({
                 src: [audioFile],
                 sprite: sprites,
                 html5: true,
-                onend: () => {
-                    console.log('Finished playing');
-                    this.endPlay()
-                },
-                onload: () => {
-                    console.log('Loaded');
-                    this.isLoadingTrack = false;
-                    this.playCurrentPhrase()
-                },
-                onloaderror: (id, error) => {
-                    console.error('Error loading track:', error);
-                    this.isLoadingTrack = false;
-                },
-                onplayerror: (id, error) => {
-                    console.error('Error playing track:', error);
-                    this.isLoadingTrack = false;
-                }
             });
             this._howler.rate(this._playbackRate);
+
+            this._howler.on('load', () => {
+                console.log('Loaded');
+                this.isLoadingTrack = false;
+                this.playCurrentPhrase();
+            });
+
+            this._howler.on('end', () => {
+                console.log('Finished playing');
+                this.endPlay();
+            });
+
+            this._howler.on('loaderror', (id, error) => {
+                console.error('Error loading track:', error);
+                this.isLoadingTrack = false;
+            });
+
+            this._howler.on('playerror', (id, error) => {
+                console.error('Error playing track:', error);
+                this.isLoadingTrack = false;
+            });
         },
 
         async togglePlayPause() {
@@ -290,10 +254,7 @@ export const usePlayerStore = defineStore('player', {
             return this.currentTrack.segments.length
         },
         isLoading() {
-            return this.isLoadingTrack || this.isLoadingPlaylist
-        },
-        _dbBaseURL() {
-            return`${BASE_PATH}/${this._currentCode}`
+            return this.isLoadingTrack
         },
         playbackRate() {
             return this._playbackRate;
@@ -303,5 +264,9 @@ export const usePlayerStore = defineStore('player', {
             // remove "lb_" from the beginning of the title
             return title.replace(/^lb_/, '').trim();
         },
+        currentDbBaseURL() {
+            const trackListStore = useTrackList();
+            return trackListStore.dbBaseURL;
+        }
     },
 })

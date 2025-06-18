@@ -85,7 +85,6 @@ import KaraokeText from "@/components/KaraokeText.vue";
 const playerStore = usePlayerStore();
 const router = useRouter();
 
-const currentPhraseIndex = computed(() => playerStore.currentPhraseIndex);
 const isPlaying = computed(() => playerStore.isPlaying);
 
 const goBack = () => {

@@ -1,6 +1,6 @@
 import {defineStore} from 'pinia';
-import {usePlayerStore} from "@/stores/usePlayerStore.js";
 import router from "@/router/index.js";
+import {useTrackList} from "@/stores/useTrackList.js";
 
 
 const LOCAL_STORAGE_KEY = 'userAccessCode';
@@ -26,9 +26,9 @@ export const useAccess = defineStore('userAccess', {
             this.isLoading = true;
             console.log(`Submitting access code: ${accessCode}`);
             try {
-                const playerStore = usePlayerStore();
+                const trackListStore = useTrackList();
                 accessCode = clearAccessCode(accessCode);
-                const result = await playerStore.fetchPlaylist(accessCode);
+                const result = await trackListStore.fetchPlaylist(accessCode);
                 if (result) {
                     this._saveAccessCode(accessCode);
                     this.accessGranted = true;

@@ -36,7 +36,7 @@
 
         <v-btn
             size="small"
-            @click="pickRandom"
+            @click="trackListStore.pickRandom"
             class="mb-1"
         >
             <v-icon>mdi-shuffle-variant</v-icon>
@@ -53,9 +53,9 @@
                 item-props
             >
                 <v-list-item
-                    v-for="track in playlistFiltered"
+                    v-for="track in trackListStore.playlistFiltered"
                     :key="track.id"
-                    @click="selectTrack(track)"
+                    @click="trackListStore.selectTrack(track)"
                     :subtitle="track.n_segments + ' фраз.'"
                 >
                     <template v-slot:prepend>
@@ -70,7 +70,7 @@
                     </template>
                 </v-list-item>
 
-                <v-list-item v-if="playlistFiltered.length === 0">
+                <v-list-item v-if="trackListStore.isAnyTracksMatching">
                     <v-list-item-title>Нет записей</v-list-item-title>
                 </v-list-item>
 
@@ -81,52 +81,18 @@
 </template>
 
 <script setup>
-import {computed} from 'vue';
 import {usePlayerStore} from '../stores/usePlayerStore';
-import router from "@/router/index.js";
 import {toHHMMSS} from "@/helpers/DateHelpers.js";
 import {useAccess} from "@/stores/userProtection.js";
 import {useTrackList} from "@/stores/useTrackList.js";
 
 const accessStore = useAccess()
 const playerStore = usePlayerStore();
-
 const trackListStore = useTrackList();
-
-const selectTrack = (track) => {
-    playerStore.selectTrack(track);
-    router.push('/player');
-};
 
 
 const pullToRefresh = async ({done}) => {
     accessStore.loadOnStart().then(() => done());
 };
-
-const pickRandom = () => {
-    // todo! move to store
-    if (playerStore.playlist.length > 0) {
-        const randomIndex = Math.floor(Math.random() * playerStore.playlist.length);
-        const randomTrack = playerStore.playlist[randomIndex];
-        selectTrack(randomTrack);
-    } else {
-        console.warn("Playlist is empty, cannot pick a random track.");
-    }
-};
-
-const playlistFiltered = computed(() => {
-    // todo! move to store
-    try {
-        if (!trackListStore.searchQuery) {
-            return playerStore.playlist;
-        } else {
-            const searchQ = trackListStore.searchQuery.trim().toLowerCase()
-            return playerStore.playlist.filter(track => track.title.toLowerCase().includes(searchQ));
-        }
-    } catch (e) {
-        console.error(e)
-        return []
-    }
-});
 
 </script>
