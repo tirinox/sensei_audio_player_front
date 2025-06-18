@@ -70,7 +70,7 @@
                     </template>
                 </v-list-item>
 
-                <v-list-item v-if="trackListStore.isAnyTracksMatching">
+                <v-list-item v-if="!trackListStore.isAnyTracksMatching">
                     <v-list-item-title>Нет записей</v-list-item-title>
                 </v-list-item>
 

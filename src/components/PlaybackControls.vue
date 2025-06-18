@@ -55,7 +55,6 @@ defineProps({
 .controls {
     padding: 0 !important;
     max-width: 500px;
-
 }
 
 .large {
