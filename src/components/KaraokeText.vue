@@ -1,10 +1,11 @@
 <style>
-    rt {
-        color: #796b7e;
-    }
-    ruby {
-        color: black;
-    }
+rt {
+    color: #796b7e;
+}
+
+ruby {
+    color: black;
+}
 </style>
 <template>
     <div class="karaoke-text pb-2">
@@ -12,24 +13,48 @@
             {{ currentIndex }} / {{ phrases.length }}
         </v-chip>
 
+        <v-btn
+            @click="toggleMode"
+            density="comfortable"
+            variant="text"
+            class="ml-2"
+        >
+            <span>{{ modeIcons[showTextMode] }}</span>
+        </v-btn>
+
         <p class="phrase-text mt-4 mb-2">
-            <span v-html="currentPhrase" v-if="showText"></span>
-            <span v-else>...</span>
-            <v-btn
-                :icon="showText ? 'mdi-eye-off' : 'mdi-eye'"
-                @click="showText = !showText"
-                density="comfortable"
-                variant="text"
-            ></v-btn>
+            <span v-html="displayedPhrase"></span>
         </p>
     </div>
 </template>
 
 <script setup>
 import {computed, ref} from 'vue';
-import {parenthesesToRuby} from "@/helpers/Nihongo.js";
+import {extractFurigana, parenthesesToRuby, stripFurigana} from "@/helpers/Nihongo.js";
 
-const showText = ref(true);
+const textModesOrder = [
+    "full",
+    "kanji",
+    "hiragana",
+    "none"
+]
+
+const modeIcons = {
+    kanji: '漢字',
+    hiragana: 'かな',
+    full: '字＋あ',
+    none: '...'
+}
+
+// From LocalStorage or default to "full"
+let initTextMode = localStorage.getItem("karaokeTextMode") || "full";
+
+// check if initTextMode is valid
+if (!textModesOrder.includes(initTextMode)) {
+    initTextMode = textModesOrder[0];
+}
+
+const showTextMode = ref(initTextMode);
 
 const props = defineProps({
     phrases: {
@@ -43,8 +68,30 @@ const props = defineProps({
 });
 
 const currentPhrase = computed(() => {
-    return parenthesesToRuby(props.phrases[props.currentIndex - 1].text)
+    return props.phrases[props.currentIndex - 1].text;
 });
+
+const displayedPhrase = computed(() => {
+    const phrase = currentPhrase.value;
+    switch (showTextMode.value) {
+        case "full":
+            return parenthesesToRuby(phrase);
+        case "kanji":
+            return stripFurigana(phrase);
+        case "hiragana":
+            return extractFurigana(phrase);
+        default:
+            return "...";
+    }
+})
+
+
+const toggleMode = () => {
+    const currentIndex = textModesOrder.indexOf(showTextMode.value);
+    const nextIndex = (currentIndex + 1) % textModesOrder.length;
+    showTextMode.value = textModesOrder[nextIndex];
+    localStorage.setItem("karaokeTextMode", showTextMode.value);
+}
 
 </script>
 
