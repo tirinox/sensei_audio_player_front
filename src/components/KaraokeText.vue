@@ -1,12 +1,3 @@
-<style>
-rt {
-    color: #796b7e;
-}
-
-ruby {
-    color: black;
-}
-</style>
 <template>
     <div class="karaoke-text pb-2">
         <v-chip class="d">
@@ -95,16 +86,20 @@ const toggleMode = () => {
 
 </script>
 
+<!--suppress CssUnresolvedCustomProperty -->
 <style scoped>
 
 .phrase-text {
     font-size: 2em;
 }
 
-.blurry {
-    font-size: 1.5em;
-    color: #ccc;
-    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+rt {
+    color: var(--v-theme-on-surface);
+    opacity: 0.6; /* optional for subtler appearance */
+}
+
+ruby {
+    color: var(--v-theme-on-surface);
 }
 
 </style>

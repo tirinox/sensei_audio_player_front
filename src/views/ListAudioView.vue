@@ -4,21 +4,11 @@
 
         <!-- Toolbar -->
         <v-app-bar app elevation="1">
-
             <v-btn icon id="menu-activator">
                 <v-icon>mdi-menu</v-icon>
             </v-btn>
 
-            <v-menu activator="#menu-activator">
-                <v-list>
-                    <v-list-item>
-                        <v-list-item-title @click="playerStore.fetchPlaylist()">Обновить</v-list-item-title>
-                    </v-list-item>
-                    <v-list-item>
-                        <v-list-item-title @click="accessStore.exit()">Выход</v-list-item-title>
-                    </v-list-item>
-                </v-list>
-            </v-menu>
+            <MainMenu></MainMenu>
 
             <!-- Title -->
             <v-toolbar-title>Список записей</v-toolbar-title>
@@ -81,15 +71,13 @@
 </template>
 
 <script setup>
-import {usePlayerStore} from '../stores/usePlayerStore';
 import {toHHMMSS} from "@/helpers/DateHelpers.js";
 import {useAccess} from "@/stores/userProtection.js";
 import {useTrackList} from "@/stores/useTrackList.js";
+import MainMenu from "@/components/MainMenu.vue";
 
 const accessStore = useAccess()
-const playerStore = usePlayerStore();
 const trackListStore = useTrackList();
-
 
 const pullToRefresh = async ({done}) => {
     accessStore.loadOnStart().then(() => done());
