@@ -49,8 +49,8 @@
                     :subtitle="track.n_segments + ' фраз.'"
                 >
                     <template v-slot:prepend>
-                        <v-avatar color="grey-lighten-1">
-                            <v-icon color="white">mdi-volume-high</v-icon>
+                        <v-avatar :color="!isDark ? 'grey-lighten-1' : 'grey-darken-3'">
+                            <v-icon :color="'white'">mdi-volume-high</v-icon>
                         </v-avatar>
                     </template>
 
@@ -75,9 +75,11 @@ import {toHHMMSS} from "@/helpers/DateHelpers.js";
 import {useAccess} from "@/stores/userProtection.js";
 import {useTrackList} from "@/stores/useTrackList.js";
 import MainMenu from "@/components/MainMenu.vue";
+import {useIsDark} from "@/helpers/Themes.js";
 
 const accessStore = useAccess()
 const trackListStore = useTrackList();
+const isDark = useIsDark()
 
 const pullToRefresh = async ({done}) => {
     accessStore.loadOnStart().then(() => done());

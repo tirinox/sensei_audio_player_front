@@ -21,11 +21,11 @@
     </v-menu>
 </template>
 
-<script setup lang="ts">
-import { useTheme } from 'vuetify'
-import { ref, computed, onMounted } from 'vue'
-import { useAccess } from '@/stores/userProtection.js'
-import { useTrackList } from '@/stores/useTrackList.js'
+<script setup>
+import {useTheme} from 'vuetify'
+import {ref, computed, onMounted} from 'vue'
+import {useAccess} from '@/stores/userProtection.js'
+import {useTrackList} from '@/stores/useTrackList.js'
 
 const accessStore = useAccess()
 const trackListStore = useTrackList()
@@ -33,11 +33,11 @@ const trackListStore = useTrackList()
 const theme = useTheme()
 const THEME_KEY = 'app_theme_mode' // 'light' or 'dark'
 
-const currentMode = ref<'light' | 'dark'>('light')
+const currentMode = ref('light')
 
 // Load theme from localStorage
 onMounted(() => {
-    const saved = localStorage.getItem(THEME_KEY) as 'light' | 'dark' | null
+    const saved = localStorage.getItem(THEME_KEY)
     if (saved === 'dark' || saved === 'light') {
         theme.global.name.value = saved
         currentMode.value = saved
