@@ -13,6 +13,30 @@
             <span>{{ modeIcons[showTextMode] }}</span>
         </v-btn>
 
+        <v-btn
+            @click="copyButton"
+            density="comfortable"
+            variant="text"
+            class="ml-2">
+            <v-icon>mdi-content-copy</v-icon>
+        </v-btn>
+
+        <v-btn
+            @click="translateDeeplButton"
+            density="comfortable"
+            variant="text"
+            class="ml-2">
+            <v-icon>mdi-translate</v-icon>
+        </v-btn>
+
+        <v-btn
+            @click="chatGtpExplainGrammarButton"
+            density="comfortable"
+            variant="text"
+            class="ml-2">
+            <v-icon>mdi-chat</v-icon>
+        </v-btn>
+
         <p class="phrase-text mt-4 mb-2">
             <span v-html="displayedPhrase"></span>
         </p>
@@ -62,9 +86,8 @@ const currentPhrase = computed(() => {
     return props.phrases[props.currentIndex - 1].text;
 });
 
-const displayedPhrase = computed(() => {
-    const phrase = currentPhrase.value;
-    switch (showTextMode.value) {
+const extractTextWithMode = (mode, phrase) => {
+    switch (mode) {
         case "full":
             return parenthesesToRuby(phrase);
         case "kanji":
@@ -74,6 +97,10 @@ const displayedPhrase = computed(() => {
         default:
             return "...";
     }
+}
+
+const displayedPhrase = computed(() => {
+    return extractTextWithMode(showTextMode.value, currentPhrase.value);
 })
 
 
@@ -82,6 +109,30 @@ const toggleMode = () => {
     const nextIndex = (currentIndex + 1) % textModesOrder.length;
     showTextMode.value = textModesOrder[nextIndex];
     localStorage.setItem("karaokeTextMode", showTextMode.value);
+}
+
+const copyButton = () => {
+    const phrase = extractTextWithMode('kanji', currentPhrase.value);
+    navigator.clipboard.writeText(phrase)
+        .then(() => {
+            console.log("Phrase copied to clipboard:", phrase);
+        })
+        .catch(err => {
+            console.error("Failed to copy phrase:", err);
+        });
+}
+
+const translateDeeplButton = () => {
+    const phrase = extractTextWithMode('kanji', currentPhrase.value);
+    const deeplUrl = `https://www.deepl.com/translator#ja/ru/${encodeURIComponent(phrase)}`;
+    window.open(deeplUrl, '_blank');
+}
+
+const chatGtpExplainGrammarButton = () => {
+    const phrase = extractTextWithMode('kanji', currentPhrase.value);
+    const ruPrompt = `Объясни грамматику следующей фразы на русском языке: "${phrase}"`;
+    const chatGptUrl = `https://chat.openai.com/?q=${encodeURIComponent(ruPrompt)}`;
+    window.open(chatGptUrl, '_blank');
 }
 
 </script>
