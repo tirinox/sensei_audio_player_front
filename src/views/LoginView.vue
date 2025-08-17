@@ -19,6 +19,10 @@
                 color="primary"
                 v-if="accessStore.isLoading"
             />
+
+            <span>
+                Загрузка...
+            </span>
         </v-container>
     </v-main>
 

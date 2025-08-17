@@ -14,6 +14,7 @@ export const useAccess = defineStore('userAccess', {
         accessCode: window.localStorage.getItem(LOCAL_STORAGE_KEY) || '',
         accessGranted: false,
         isLoading: true,
+        appVersion: import.meta.env.VITE_APP_VERSION || 'unknown',
     }),
     actions: {
         _saveAccessCode(accessCode) {
