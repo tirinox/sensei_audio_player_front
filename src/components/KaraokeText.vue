@@ -1,45 +1,56 @@
 <template>
     <div class="karaoke-text pb-2">
-        <v-chip class="d">
-            {{ currentIndex }} / {{ phrases.length }}
-        </v-chip>
 
-        <v-btn
-            @click="toggleMode"
-            density="comfortable"
-            variant="text"
-            class="ml-2"
-        >
-            <span>{{ modeIcons[showTextMode] }}</span>
-        </v-btn>
 
-        <v-btn
-            @click="copyButton"
-            density="comfortable"
-            variant="text"
-            class="ml-2">
-            <v-icon>mdi-content-copy</v-icon>
-        </v-btn>
+        <div>
 
-        <v-btn
-            @click="translateDeeplButton"
-            density="comfortable"
-            variant="text"
-            class="ml-2">
-            <v-icon>mdi-translate</v-icon>
-        </v-btn>
+            <v-chip class="d mr-2">
+                {{ currentIndex }} / {{ phrases.length }}
+            </v-chip>
 
-        <v-btn
-            @click="chatGtpExplainGrammarButton"
-            density="comfortable"
-            variant="text"
-            class="ml-2">
-            <v-icon>mdi-chat</v-icon>
-        </v-btn>
+            <v-btn
+                @click="toggleMode"
+                size="small"
+                variant="text"
+                class="pa-0"
+            >
+                <span>{{ modeIcons[showTextMode] }}</span>
+            </v-btn>
+
+            <v-btn
+                @click="copyButton"
+                size="small"
+                variant="text"
+                class="pa-0">
+                <v-icon>mdi-content-copy</v-icon>
+            </v-btn>
+
+            <v-btn
+                @click="translateDeeplButton"
+                size="small"
+                variant="text"
+                class="pa-0"
+            >
+                <v-icon>mdi-translate</v-icon>
+            </v-btn>
+
+            <v-btn
+                @click="chatGtpExplainGrammarButton"
+                density="comfortable"
+                variant="text"
+                class="pa-0"
+            >
+                <v-icon>mdi-chat</v-icon>
+            </v-btn>
+
+        </div>
+
 
         <p class="phrase-text mt-4 mb-2">
             <span v-html="displayedPhrase"></span>
         </p>
+
+
     </div>
 </template>
 
