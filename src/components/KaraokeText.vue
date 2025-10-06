@@ -143,7 +143,18 @@ const chatGtpExplainGrammarButton = () => {
     const phrase = extractTextWithMode('kanji', currentPhrase.value);
     const ruPrompt = `Объясни грамматику следующей фразы на русском языке: "${phrase}"`;
     const chatGptUrl = `https://chat.openai.com/?q=${encodeURIComponent(ruPrompt)}`;
-    window.open(chatGptUrl, '_blank');
+    // window.open(chatGptUrl, '_blank');
+
+    const win = window.open(); // open immediately to avoid popup blocker
+    win.location = chatGptUrl;
+
+    // Auto-close that tab after 1 second (optional)
+    setTimeout(() => {
+        try {
+            win.close();
+        } catch {
+        }
+    }, 1000);
 }
 
 </script>
