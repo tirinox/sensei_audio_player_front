@@ -16,7 +16,7 @@
 
 <style>
 
-html, body, #app {
+html, body, .appcont {
   height: 100%;
   overflow-x: hidden; /* Prevents horizontal scrolling */
   overflow-y: auto; /* Ensures vertical scrolling */
