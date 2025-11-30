@@ -1,6 +1,6 @@
 <template>
     <v-container class="controls">
-        <v-row class="d-flex align-end">
+        <v-row class="d-flex align-end pt-1">
             <v-col class="text-center" cols="3">
                 <v-btn icon @click="$emit('restart')" :readonly="!enabled">
                     <v-icon>mdi-skip-backward</v-icon>
@@ -16,14 +16,14 @@
             </v-col>
 
             <v-col class="text-center" cols="3">
-                <v-btn icon @click="$emit('playPause')"  :readonly="!enabled" class="large">
+                <v-btn icon @click="$emit('playPause')" :readonly="!enabled" class="large" size="large">
                     <v-icon>{{ isPlaying && isPlayingCurrent ? 'mdi-pause' : 'mdi-replay' }}</v-icon>
                 </v-btn>
                 <div class="mt-2 text-subtitle-2">ещё</div>
             </v-col>
 
             <v-col class="text-center" cols="3">
-                <v-btn icon @click="$emit('next')" :readonly="!enabled" class="large">
+                <v-btn icon @click="$emit('next')" :readonly="!enabled" size="large">
                     <v-icon>{{ isPlaying && !isPlayingCurrent ? 'mdi-pause' : 'mdi-skip-next' }}</v-icon>
                 </v-btn>
                 <div class="mt-2 text-subtitle-2">след</div>
@@ -57,8 +57,5 @@ defineProps({
     max-width: 500px;
 }
 
-.large {
-    //font-size: 1.1em;
-    scale: 1.2;
-}
+
 </style>
