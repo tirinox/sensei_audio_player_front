@@ -13,8 +13,8 @@
         </v-app-bar>
 
         <v-row v-if="playerStore.currentTrack">
-            <v-col>
-                <v-card>
+            <v-col class="pa-0 ma-0">
+                <v-card class="ma-0">
                     <v-card-text>
                         <KaraokeText
                             :current-index="playerStore.currentPhraseIndex"
@@ -27,7 +27,6 @@
                             :is-loading="playerStore.isLoading"
                             v-model="progress"
                         />
-
 
                         <v-row class="d-flex justify-left">
                             <div class="ml-2">Скорость речи:</div>
@@ -76,7 +75,7 @@
 <script setup>
 import {computed, onBeforeUnmount, onMounted} from 'vue';
 import {useRouter} from 'vue-router';
-import {usePlayerStore} from '../stores/usePlayerStore';
+import {usePlayerStore} from '../stores/playerStore.js';
 
 import ProgressBar from '../components/ProgressBar.vue';
 import PlaybackControls from '../components/PlaybackControls.vue';

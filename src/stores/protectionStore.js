@@ -1,6 +1,6 @@
 import {defineStore} from 'pinia';
 import router from "@/router/index.js";
-import {useTrackList} from "@/stores/useTrackList.js";
+import {useTrackListStore} from "@/stores/trackListStore.js";
 
 
 const LOCAL_STORAGE_KEY = 'userAccessCode';
@@ -27,7 +27,7 @@ export const useAccess = defineStore('userAccess', {
             this.isLoading = true;
             console.log(`Submitting access code: ${accessCode}`);
             try {
-                const trackListStore = useTrackList();
+                const trackListStore = useTrackListStore();
                 accessCode = clearAccessCode(accessCode);
                 const result = await trackListStore.fetchPlaylist(accessCode);
                 if (result) {
@@ -44,8 +44,12 @@ export const useAccess = defineStore('userAccess', {
             }
         },
 
-        async loadOnStart() {
-            if(this.accessCode) {
+       async loadOnStart() {
+            const routeQuery = router.currentRoute?.value?.query || {};
+            const queryCode = (routeQuery.accessCode || routeQuery.code || '').toString();
+            if (queryCode) {
+                await this.submitAccessCode(queryCode);
+            } else if (this.accessCode) {
                 await this.submitAccessCode(this.accessCode);
             } else {
                 this.isLoading = false;

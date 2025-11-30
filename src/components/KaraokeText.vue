@@ -1,9 +1,6 @@
 <template>
-    <div class="karaoke-text pb-2">
-
-
+    <div class="karaoke-text pb-3">
         <div>
-
             <v-chip class="d mr-2">
                 {{ currentIndex }} / {{ phrases.length }}
             </v-chip>

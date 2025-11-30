@@ -27,7 +27,7 @@
 
 <script setup>
 import {ref} from 'vue'
-import {useAccess} from '@/stores/userProtection'
+import {useAccess} from '@/stores/protectionStore.js'
 
 // Setup Pinia store
 const store = useAccess()

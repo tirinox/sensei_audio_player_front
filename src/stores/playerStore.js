@@ -1,6 +1,6 @@
 import {defineStore} from 'pinia';
 import {Howl} from 'howler';
-import {useTrackList} from "@/stores/useTrackList.js";
+import {useTrackListStore} from "@/stores/trackListStore.js";
 
 
 export const usePlayerStore = defineStore('player', {
@@ -265,7 +265,7 @@ export const usePlayerStore = defineStore('player', {
             return title.replace(/^lb_/, '').trim();
         },
         currentDbBaseURL() {
-            const trackListStore = useTrackList();
+            const trackListStore = useTrackListStore();
             return trackListStore.dbBaseURL;
         }
     },

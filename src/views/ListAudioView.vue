@@ -72,13 +72,13 @@
 
 <script setup>
 import {toHHMMSS} from "@/helpers/DateHelpers.js";
-import {useAccess} from "@/stores/userProtection.js";
-import {useTrackList} from "@/stores/useTrackList.js";
+import {useAccess} from "@/stores/protectionStore.js";
+import {useTrackListStore} from "@/stores/trackListStore.js";
 import MainMenu from "@/components/MainMenu.vue";
 import {useIsDark} from "@/helpers/Themes.js";
 
 const accessStore = useAccess()
-const trackListStore = useTrackList();
+const trackListStore = useTrackListStore();
 const isDark = useIsDark()
 
 const pullToRefresh = async ({done}) => {

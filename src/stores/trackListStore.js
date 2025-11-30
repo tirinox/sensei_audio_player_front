@@ -1,13 +1,12 @@
 import {defineStore} from 'pinia';
-import {usePlayerStore} from "@/stores/usePlayerStore.js";
+import {usePlayerStore} from "@/stores/playerStore.js";
 import router from "@/router/index.js";
 
 
-// const BASE_PATH = import.meta.env.PROD ? '/audio_db' : '/test';
 const BASE_PATH = '/audio_db'
 console.info('Audio base path:', BASE_PATH);
 
-export const useTrackList = defineStore('trackList', {
+export const useTrackListStore = defineStore('trackList', {
     state: () => ({
         searchQuery: '',
         playlist: [],

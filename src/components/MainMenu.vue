@@ -24,11 +24,11 @@
 <script setup>
 import {useTheme} from 'vuetify'
 import {ref, computed, onMounted} from 'vue'
-import {useAccess} from '@/stores/userProtection.js'
-import {useTrackList} from '@/stores/useTrackList.js'
+import {useAccess} from '@/stores/protectionStore.js'
+import {useTrackListStore} from '@/stores/trackListStore.js'
 
 const accessStore = useAccess()
-const trackListStore = useTrackList()
+const trackListStore = useTrackListStore()
 
 const theme = useTheme()
 const THEME_KEY = 'app_theme_mode' // 'light' or 'dark'
@@ -39,8 +39,8 @@ const currentMode = ref('light')
 onMounted(() => {
     const saved = localStorage.getItem(THEME_KEY)
     if (saved === 'dark' || saved === 'light') {
-        theme.global.name.value = saved
-        currentMode.value = saved
+        theme.change(saved);
+        currentMode.value = saved;
     }
 })
 

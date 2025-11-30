@@ -32,7 +32,7 @@
 // No script logic needed for static loading screen
 import AccessCodeDialog from "@/components/AccessCodeDialog.vue";
 import {onMounted} from "vue";
-import {useAccess} from "@/stores/userProtection.js";
+import {useAccess} from "@/stores/protectionStore.js";
 
 const accessStore = useAccess()
 
