@@ -1,19 +1,8 @@
 <template>
-    <!-- Content -->
+    <!-- Toolbar -->
+
+
     <v-container>
-
-        <!-- Toolbar -->
-        <v-app-bar app elevation="1">
-            <v-btn icon id="menu-activator">
-                <v-icon>mdi-menu</v-icon>
-            </v-btn>
-
-            <MainMenu></MainMenu>
-
-            <!-- Title -->
-            <v-toolbar-title>Список записей</v-toolbar-title>
-
-        </v-app-bar>
 
         <!-- Text field for filtering -->
         <v-text-field
@@ -68,6 +57,7 @@
         </v-pull-to-refresh>
     </v-container>
 
+
 </template>
 
 <script setup>
@@ -86,3 +76,9 @@ const pullToRefresh = async ({done}) => {
 };
 
 </script>
+
+<style>
+.appbar {
+    padding-top: env(safe-area-inset-top);
+}
+</style>

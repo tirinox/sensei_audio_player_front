@@ -1,53 +1,36 @@
 <template>
     <v-container class="cont">
-        <v-app-bar
-            app
-            fixed
-            elevation="2"
-        >
-            <v-btn icon @click="goBack">
-                <v-icon>mdi-arrow-left</v-icon>
-            </v-btn>
-            <v-toolbar-title>{{ playerStore.title }}
-            </v-toolbar-title>
-        </v-app-bar>
+        <v-card v-if="playerStore.currentTrack">
+            <v-card-text>
+                <KaraokeText
+                    :current-index="playerStore.currentPhraseIndex"
+                    :phrases="playerStore.currentTrack.segments"
+                    v-if="playerStore.currentTrack"
+                ></KaraokeText>
 
-        <v-row v-if="playerStore.currentTrack">
-            <v-col class="pa-0 ma-0">
-                <v-card class="ma-0">
-                    <v-card-text>
-                        <KaraokeText
-                            :current-index="playerStore.currentPhraseIndex"
-                            :phrases="playerStore.currentTrack.segments"
-                            v-if="playerStore.currentTrack"
-                        ></KaraokeText>
+                <ProgressBar
+                    :duration="playerStore.totalPhrases"
+                    :is-loading="playerStore.isLoading"
+                    v-model="progress"
+                />
 
-                        <ProgressBar
-                            :duration="playerStore.totalPhrases"
-                            :is-loading="playerStore.isLoading"
-                            v-model="progress"
-                        />
+                <v-row class="d-flex justify-left">
+                    <div class="ml-2">Скорость речи:</div>
+                    <v-btn
+                        v-for="rate in [0.5, 0.75, 1, 1.25]"
+                        :key="rate"
+                        variant="text"
+                        size="s"
+                        @click="playerStore.setRatePlaybackRate(rate)"
+                        :color="playerStore.playbackRate === rate ? 'primary' : 'default'"
+                        class="ml-1"
+                    >
+                        {{ rate }}x
+                    </v-btn>
+                </v-row>
 
-                        <v-row class="d-flex justify-left">
-                            <div class="ml-2">Скорость речи:</div>
-                            <v-btn
-                                v-for="rate in [0.5, 0.75, 1, 1.25]"
-                                :key="rate"
-                                variant="text"
-                                size="s"
-                                @click="playerStore.setRatePlaybackRate(rate)"
-                                :color="playerStore.playbackRate === rate ? 'primary' : 'default'"
-                                class="ml-1"
-                            >
-                                {{ rate }}x
-                            </v-btn>
-                        </v-row>
-
-                    </v-card-text>
-                </v-card>
-
-            </v-col>
-        </v-row>
+            </v-card-text>
+        </v-card>
 
         <v-footer absolute inset app width="auto">
             <v-container>
@@ -86,10 +69,6 @@ const router = useRouter();
 
 const isPlaying = computed(() => playerStore.isPlaying);
 
-const goBack = () => {
-    playerStore.stop()
-    router.push('/');
-};
 
 const togglePlayPause = () => {
     playerStore.togglePlayPause();

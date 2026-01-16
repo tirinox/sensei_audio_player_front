@@ -15,7 +15,7 @@ const router = createRouter({
         {
             path: '/playlist',
             name: 'playlist',
-            component: ListAudioView
+            component: ListAudioView,
         },
         {
             path: '/player',

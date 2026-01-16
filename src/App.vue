@@ -1,26 +1,40 @@
-<script setup></script>
+<script setup>
+import PlayerAppBar from "@/components/PlayerAppBar.vue";
+import ListAudioAppBar from "@/components/ListAudioAppBar.vue";
+import {useRoute} from "vue-router";
+import {computed} from "vue";
+
+const route = useRoute();
+
+const appBarComponent = computed(() => {
+    switch (route.name) {
+        case "player": return PlayerAppBar;
+        case "playlist":
+        default:       return ListAudioAppBar;
+    }
+});
+</script>
 
 <template>
-  <v-app>
-    <v-main>
-      <v-container name="appcont" class="appcont">
-        <router-view v-slot="{ Component }">
-          <transition>
-            <component :is="Component"/>
-          </transition>
-        </router-view>
-      </v-container>
-    </v-main>
-  </v-app>
+    <v-app>
+        <v-app-bar app elevation="1" class="appbar">
+            <component :is="appBarComponent" />
+        </v-app-bar>
+
+        <v-main class="main">
+            <router-view />
+        </v-main>
+    </v-app>
 </template>
 
 <style>
 
-html, body, .appcont {
-  height: 100%;
-  overflow-x: hidden; /* Prevents horizontal scrolling */
-  overflow-y: auto; /* Ensures vertical scrolling */
-  -webkit-overflow-scrolling: touch; /* Enables smooth scrolling on iOS */
-}
+/* safe area именно на верхний layout */
+.appbar { padding-top: env(safe-area-inset-top); }
+.main   { padding-top: env(safe-area-inset-top); }
+
+/* важно: не делай внутренний скролл-контейнер на appcont */
+html, body, #app { height: 100%; }
+body { margin: 0; overflow-x: hidden; }
 
 </style>
