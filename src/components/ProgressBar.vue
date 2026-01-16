@@ -11,10 +11,9 @@
 
       v-if="!props.isLoading"
   ></v-slider>
-  <v-progress-linear
-      indeterminate height="10" class="mt-1 mb-1"
-      color="blue-lighten-1" rounded v-else
-  ></v-progress-linear>
+
+    <v-skeleton-loader type="heading" v-if="props.isLoading" class="mb-3"/>
+
 </template>
 
 <script setup>
