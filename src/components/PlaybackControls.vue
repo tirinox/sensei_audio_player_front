@@ -1,34 +1,32 @@
 <template>
-    <v-container class="controls">
-        <v-row class="d-flex align-end pt-1">
-            <v-col class="text-center" cols="3">
-                <v-btn icon @click="$emit('restart')" :readonly="!enabled">
-                    <v-icon>mdi-skip-backward</v-icon>
-                </v-btn>
-                <div class="mt-2 text-subtitle-2">начало</div>
-            </v-col>
+    <v-container class="controls d-flex justify-space-between">
+        <div class="d-flex flex-column justify-end">
+            <v-btn icon @click="$emit('restart')" :readonly="!enabled" size="48">
+                <v-icon size="30">mdi-skip-backward</v-icon>
+            </v-btn>
+            <div class="mt-2 text-subtitle-2">начало</div>
+        </div>
 
-            <v-col class="text-center" cols="3">
-                <v-btn icon @click="$emit('prev')" :readonly="!enabled">
-                    <v-icon>mdi-skip-previous</v-icon>
-                </v-btn>
-                <div class="mt-2 text-subtitle-2">пред</div>
-            </v-col>
+        <div class="d-flex flex-column align-center justify-end">
+            <v-btn icon @click="$emit('prev')" :readonly="!enabled" size="48">
+                <v-icon size="30">mdi-skip-previous</v-icon>
+            </v-btn>
+            <div class="mt-2 text-subtitle-2">пред</div>
+        </div>
 
-            <v-col class="text-center" cols="3">
-                <v-btn icon @click="$emit('playPause')" :readonly="!enabled" class="large" size="large">
-                    <v-icon>{{ isPlaying && isPlayingCurrent ? 'mdi-pause' : 'mdi-replay' }}</v-icon>
-                </v-btn>
-                <div class="mt-2 text-subtitle-2">ещё</div>
-            </v-col>
+        <div class="d-flex flex-column align-center justify-end">
+            <v-btn icon @click="$emit('playPause')" :readonly="!enabled" size="48">
+                <v-icon size="30">{{ isPlaying && isPlayingCurrent ? 'mdi-pause' : 'mdi-replay' }}</v-icon>
+            </v-btn>
+            <div class="mt-2 text-subtitle-2">ещё</div>
+        </div>
 
-            <v-col class="text-center" cols="3">
-                <v-btn icon @click="$emit('next')" :readonly="!enabled" size="large">
-                    <v-icon>{{ isPlaying && !isPlayingCurrent ? 'mdi-pause' : 'mdi-skip-next' }}</v-icon>
-                </v-btn>
-                <div class="mt-2 text-subtitle-2">след</div>
-            </v-col>
-        </v-row>
+        <div class="d-flex flex-column align-center justify-end">
+            <v-btn icon @click="$emit('next')" :readonly="!enabled" size="64">
+                <v-icon size="38">{{ isPlaying && !isPlayingCurrent ? 'mdi-pause' : 'mdi-skip-next' }}</v-icon>
+            </v-btn>
+            <div class="mt-2 text-subtitle-2">след</div>
+        </div>
     </v-container>
 </template>
 
@@ -57,5 +55,9 @@ defineProps({
     max-width: 500px;
 }
 
+.control-btn {
+    width: 64px;
+    height: 64px;
+}
 
 </style>
