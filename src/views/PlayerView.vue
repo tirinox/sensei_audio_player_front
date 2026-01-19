@@ -32,24 +32,18 @@
             </v-card-text>
         </v-card>
 
-        <v-footer absolute inset app width="auto">
-            <v-container>
-                <v-row justify="center">
-                    <v-col lg="4" cols="12" align-self="center">
-                        <v-card class="controls pa-1" elevation="0">
-                            <PlaybackControls
-                                :isPlaying="isPlaying"
-                                :isPlayingCurrent="playerStore.isPlayingCurrent"
-                                :enabled="controlsEnabled"
-                                @prev="prevPhrase"
-                                @playPause="togglePlayPause"
-                                @next="nextPhrase"
-                                @restart="restartTrack"
-                            />
-                        </v-card>
-                    </v-col>
-                </v-row>
-            </v-container>
+        <v-footer absolute inset app>
+            <v-card class="pa-2 w-100" elevation="0">
+                <PlaybackControls
+                    :isPlaying="isPlaying"
+                    :isPlayingCurrent="playerStore.isPlayingCurrent"
+                    :enabled="controlsEnabled"
+                    @prev="prevPhrase"
+                    @playPause="togglePlayPause"
+                    @next="nextPhrase"
+                    @restart="restartTrack"
+                />
+            </v-card>
         </v-footer>
 
     </v-container>
