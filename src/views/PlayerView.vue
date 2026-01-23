@@ -14,7 +14,7 @@
                     v-model="progress"
                 />
 
-                <v-row class="d-flex justify-left">
+                <v-row class="d-flex justify-left" v-if="SPEED_CONTROL_ENABLED">
                     <div class="ml-2">Скорость речи:</div>
                     <v-btn
                         v-for="rate in [0.5, 0.75, 1, 1.25]"
@@ -29,6 +29,10 @@
                     </v-btn>
                 </v-row>
 
+                <v-row class="" v-if="playerStore.temporaryPlaybackRate">
+                    <div class="ml-2">Временная скорость речи: {{ playerStore.temporaryPlaybackRate }}x</div>
+                </v-row>
+
             </v-card-text>
         </v-card>
 
@@ -38,10 +42,7 @@
                     :isPlaying="isPlaying"
                     :isPlayingCurrent="playerStore.isPlayingCurrent"
                     :enabled="controlsEnabled"
-                    @prev="prevPhrase"
-                    @playPause="togglePlayPause"
-                    @next="nextPhrase"
-                    @restart="restartTrack"
+                    @longTap="longTapPlayerAction"
                 />
             </v-card>
         </v-footer>
@@ -63,22 +64,11 @@ const router = useRouter();
 
 const isPlaying = computed(() => playerStore.isPlaying);
 
+const SPEED_CONTROL_ENABLED = false;
+const MAX_SLOW_RATE = 0.5;
+const SHORT_TAP_MAX_DURATION = 0.17; // seconds
+const LONG_TAP_MAX_DURATION = 2.0; // seconds
 
-const togglePlayPause = () => {
-    playerStore.togglePlayPause();
-};
-
-const prevPhrase = () => {
-    playerStore.prevPhrase();
-};
-
-const nextPhrase = () => {
-    playerStore.nextPhrase();
-};
-
-const restartTrack = () => {
-    playerStore.restartTrack();
-};
 
 const st = {
     scrollTimeout: null,
@@ -120,13 +110,44 @@ const controlsEnabled = computed(() => {
 });
 
 const keyDownHandler = (event) => {
+    playerStore.restorePlaybackRate()
     if (event.key === ' ') {
         playerStore.playCurrentPhrase()
     } else if (event.key === 'ArrowLeft') {
-        prevPhrase();
+        playerStore.prevPhrase();
     } else if (event.key === 'ArrowRight') {
-        nextPhrase();
+        playerStore.nextPhrase();
     }
+};
+
+const longTapPlayerAction = ({action, seconds}) => {
+    if (seconds > SHORT_TAP_MAX_DURATION) {
+        const clampedSeconds = Math.min(Math.max(seconds, SHORT_TAP_MAX_DURATION), LONG_TAP_MAX_DURATION);
+        // slow down rate from 1.0 to MAX_SLOW_RATE linearly
+        const newRate = 1.0 - (clampedSeconds - SHORT_TAP_MAX_DURATION) /
+            (LONG_TAP_MAX_DURATION - SHORT_TAP_MAX_DURATION) * (1.0 - MAX_SLOW_RATE);
+
+        console.log(`Long tap detected: ${seconds.toFixed(2)}s, setting rate to ${newRate.toFixed(2)}x`);
+        playerStore.setRatePlaybackRate(parseFloat(newRate.toFixed(2)), true);
+    } else {
+        playerStore.restorePlaybackRate()
+    }
+
+    switch (action) {
+        case 'prev':
+            playerStore.prevPhrase();
+            break;
+        case 'playPause':
+            playerStore.togglePlayPause();
+            break;
+        case 'next':
+            playerStore.nextPhrase();
+            break;
+        case 'restart':
+            playerStore.restartTrack();
+            break;
+    }
+
 };
 
 </script>

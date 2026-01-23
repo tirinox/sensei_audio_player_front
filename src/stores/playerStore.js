@@ -13,6 +13,7 @@ export const usePlayerStore = defineStore('player', {
         isLoadingTrack: false,
         isPlayingCurrent: false,
         _playbackRate: +window.localStorage.getItem('playbackRate') || 1.0,
+        temporaryPlaybackRate: null,
     }),
     actions: {
         async fetchTrack(track) {
@@ -51,7 +52,7 @@ export const usePlayerStore = defineStore('player', {
             this.isLoadingTrack = true;
 
             const tr = await this.fetchTrack(track);
-            if(!tr) {
+            if (!tr) {
                 console.error(`Error fetching track ${track.title}`);
                 return;
             }
@@ -111,7 +112,7 @@ export const usePlayerStore = defineStore('player', {
 
         async stop() {
             this.isPlaying = false;
-            if(this._howler) {
+            if (this._howler) {
                 this._howler.pause();
             }
         },
@@ -121,6 +122,8 @@ export const usePlayerStore = defineStore('player', {
             if (this.repeatOne) {
                 await this.nextPhrase(true)
             }
+
+            this.restorePlaybackRate()
         },
 
         async prevPhrase() {
@@ -151,6 +154,11 @@ export const usePlayerStore = defineStore('player', {
         },
 
         async playCurrentPhrase() {
+            if (!this._howler) {
+                console.error('playCurrentPhrase: Howler instance is not initialized');
+                return
+            }
+
             const phrase = this.currentPhrase;
             if (phrase) {
                 console.info(`Playing phrase ${this.currentPhraseIndex}/${this.totalPhrases}: ${phrase.text}`);
@@ -171,11 +179,6 @@ export const usePlayerStore = defineStore('player', {
                     album: this.currentTrack.title,
                     artwork: [
                         {src: 'icon-192.png', sizes: '192x192', type: 'image/png'},
-                        // {src: playerStore.currentTrack.cover, sizes: '128x128', type: 'image/png'},
-                        // {src: playerStore.currentTrack.cover, sizes: '192x192', type: 'image/png'},
-                        // {src: playerStore.currentTrack.cover, sizes: '256x256', type: 'image/png'},
-                        // {src: playerStore.currentTrack.cover, sizes: '384x384', type: 'image/png'},
-                        // {src: playerStore.currentTrack.cover, sizes: '512x512', type: 'image/png'},
                     ]
                 });
             }
@@ -199,11 +202,6 @@ export const usePlayerStore = defineStore('player', {
                     album: this.currentTrack.title,
                     artwork: [
                         {src: 'icon-192.png', sizes: '192x192', type: 'image/png'},
-                        // {src: playerStore.currentTrack.cover, sizes: '128x128', type: 'image/png'},
-                        // {src: playerStore.currentTrack.cover, sizes: '192x192', type: 'image/png'},
-                        // {src: playerStore.currentTrack.cover, sizes: '256x256', type: 'image/png'},
-                        // {src: playerStore.currentTrack.cover, sizes: '384x384', type: 'image/png'},
-                        // {src: playerStore.currentTrack.cover, sizes: '512x512', type: 'image/png'},
                     ]
                 });
 
@@ -234,16 +232,27 @@ export const usePlayerStore = defineStore('player', {
             }
         },
 
-        setRatePlaybackRate(rate) {
-            if (this._howler) {
+        setRatePlaybackRate(rate, once = false) {
+            if (!this._howler) {
+                console.error('setRatePlaybackRate: Howler instance is not initialized');
+                return
+            }
+
+            this._howler.rate(rate);
+            if (!once) {
                 this._playbackRate = rate
-                window.localStorage.setItem('playbackRate', rate);
-                this._howler.rate(rate);
                 console.info(`setRatePlaybackRate: Playback rate set to ${rate}`);
+                window.localStorage.setItem('playbackRate', rate);
                 this.playCurrentPhrase()
             } else {
-                console.error('setRatePlaybackRate: Howler instance is not initialized');
+                this.temporaryPlaybackRate = rate;
             }
+        },
+
+        restorePlaybackRate() {
+            this.temporaryPlaybackRate = null;
+            this._howler?.rate(this._playbackRate);
+            console.log('Restored playback rate to', this._playbackRate);
         }
     },
     getters: {

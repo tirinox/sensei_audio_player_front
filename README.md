@@ -1,6 +1,8 @@
 # sensei-audio-front-app
 
-This template should help get you started developing with Vue 3 in Vite.
+You can share access to audio content with others using this application.
+https://domain.com/?accessCode=JPXXXXXX like this, where JPXXXXXX is the access code.
+So the user can skip registration and directly access the content.
 
 ## Recommended IDE Setup
 
