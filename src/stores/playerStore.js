@@ -137,7 +137,7 @@ export const usePlayerStore = defineStore('player', {
         },
 
         async nextPhrase(justShift = false) {
-            if(this.isPlaying) {
+            if (this.isPlaying) {
                 this.togglePlayPause()
                 return;
             }
@@ -281,6 +281,46 @@ export const usePlayerStore = defineStore('player', {
         currentDbBaseURL() {
             const trackListStore = useTrackListStore();
             return trackListStore.dbBaseURL;
-        }
+        },
+        sections() {
+            const sections = [];
+            const segments = this.currentTrack?.segments || [];
+
+            // 1) Префикс (опционально): 練習A / 練習B / 練習C (можно с пробелом)
+            const rePrefix = String.raw`(?:練習\s*[ABC]\s*)?`;
+
+            // 2) Число: ASCII цифры или full-width цифры
+            //    - full-width диапазон: ０-９
+            const reDigits = String.raw`(?:[0-9]+|[０-９]+)`;
+
+            // 3) Канжи 1..10 (без 11+)
+            const reKanji1to10 = String.raw`(?:[一二三四五六七八九十])`;
+
+            // 4) Общий "номер"
+            const reNumber = String.raw`(?:${reDigits}|${reKanji1to10})`;
+
+            // 5) Разделитель после номера (опционально): . / ． / 。
+            const reSep = String.raw`(?:[.\uFF0E\u3002])?`; // . , fullwidth dot, Japanese 。
+
+            // 6) После номера: пробелы или конец строки
+            const reTail = String.raw`(?:\s+|$)`;
+
+            // Итог: начало строки -> (префикс)? -> номер -> (sep)? -> (space|eol)
+            const reSectionStart = new RegExp(
+                `^\\s*${rePrefix}${reNumber}${reSep}${reTail}`,
+                "u"
+            );
+
+            for (let i = 0; i < segments.length; i++) {
+                const s = segments[i];
+                const text = (s.original_text || '').trim();
+
+                if (reSectionStart.test(text)) {
+                    sections.push({index: i + 1, text});
+                }
+            }
+
+            return sections;
+        },
     },
 })

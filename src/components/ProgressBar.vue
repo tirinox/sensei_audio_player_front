@@ -1,19 +1,14 @@
 <template>
   <v-slider
       v-model="model1"
-      height="10"
       :max="duration"
       :min="1"
       :step="1"
       color="blue-lighten-1"
       thumb-label
-      class="mt-1 mb-1"
-
       v-if="!props.isLoading"
   ></v-slider>
-
-    <v-skeleton-loader type="heading" v-if="props.isLoading" class="mb-3"/>
-
+    <v-skeleton-loader type="heading" v-else/>
 </template>
 
 <script setup>

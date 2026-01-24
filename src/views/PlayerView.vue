@@ -1,18 +1,12 @@
 <template>
-    <v-container class="cont">
-        <v-card v-if="playerStore.currentTrack">
+    <v-container class="d-flex flex-column h-100">
+        <v-card v-if="playerStore.currentTrack" class="rounded-xl" elevation="2">
             <v-card-text>
                 <KaraokeText
-                    :current-index="playerStore.currentPhraseIndex"
-                    :phrases="playerStore.currentTrack.segments"
-                    v-if="playerStore.currentTrack"
+                    :current-index="currentPhraseIndex"
+                    :phrases="track.segments"
+                    v-if="track"
                 ></KaraokeText>
-
-                <ProgressBar
-                    :duration="playerStore.totalPhrases"
-                    :is-loading="playerStore.isLoading"
-                    v-model="progress"
-                />
 
                 <v-row class="d-flex justify-left" v-if="SPEED_CONTROL_ENABLED">
                     <div class="ml-2">Скорость речи:</div>
@@ -34,6 +28,29 @@
                 </v-row>
 
             </v-card-text>
+        </v-card>
+
+        <v-spacer></v-spacer>
+
+        <v-card class="rounded-xl" elevation="2">
+            <v-card-text class="text-center">
+                <v-chip class="d mr-2" v-if="track">
+                    {{ currentPhraseIndex }} / {{ track.segments.length }}
+                </v-chip>
+
+                <ProgressBar
+                    :duration="playerStore.totalPhrases"
+                    :is-loading="playerStore.isLoading"
+                    v-model="progress"
+                />
+
+                <SectionSelector
+                    :sections="playerStore.sections"
+                    @select="goToSection"
+                    v-if="track"
+                />
+            </v-card-text>
+
         </v-card>
 
         <v-footer absolute inset app>
@@ -58,6 +75,7 @@ import {usePlayerStore} from '../stores/playerStore.js';
 import ProgressBar from '../components/ProgressBar.vue';
 import PlaybackControls from '../components/PlaybackControls.vue';
 import KaraokeText from "@/components/KaraokeText.vue";
+import SectionSelector from "@/components/SectionSelector.vue";
 
 const playerStore = usePlayerStore();
 const router = useRouter();
@@ -68,6 +86,9 @@ const SPEED_CONTROL_ENABLED = false;
 const MAX_SLOW_RATE = 0.5;
 const SHORT_TAP_MAX_DURATION = 0.17; // seconds
 const LONG_TAP_MAX_DURATION = 2.0; // seconds
+
+const track = computed(() => playerStore.currentTrack);
+const currentPhraseIndex = computed(() => playerStore.currentPhraseIndex);
 
 
 const st = {
@@ -147,8 +168,12 @@ const longTapPlayerAction = ({action, seconds}) => {
             playerStore.restartTrack();
             break;
     }
-
 };
+
+const goToSection = ({index}) => {
+    playerStore.currentPhraseIndex = index;
+    playerStore.playCurrentPhrase();
+}
 
 </script>
 
