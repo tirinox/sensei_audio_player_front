@@ -137,6 +137,11 @@ export const usePlayerStore = defineStore('player', {
         },
 
         async nextPhrase(justShift = false) {
+            if(this.isPlaying) {
+                this.togglePlayPause()
+                return;
+            }
+
             this.currentPhraseIndex += 1;
             if (this.currentPhraseIndex > this.totalPhrases) {
                 this.currentPhraseIndex = 1;

@@ -112,7 +112,7 @@ const controlsEnabled = computed(() => {
 const keyDownHandler = (event) => {
     playerStore.restorePlaybackRate()
     if (event.key === ' ') {
-        playerStore.playCurrentPhrase()
+        playerStore.togglePlayPause()
     } else if (event.key === 'ArrowLeft') {
         playerStore.prevPhrase();
     } else if (event.key === 'ArrowRight') {
