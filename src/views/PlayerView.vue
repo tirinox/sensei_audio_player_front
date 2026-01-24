@@ -34,9 +34,17 @@
 
         <v-card class="rounded-xl" elevation="2">
             <v-card-text class="text-center">
-                <v-chip class="d mr-2" v-if="track">
-                    {{ currentPhraseIndex }} / {{ track.segments.length }}
-                </v-chip>
+                <div class="d-flex ga-2 align-center mb-2">
+                    <v-chip class="d mr-2" v-if="track">
+                        {{ currentPhraseIndex }} / {{ track.segments.length }}
+                    </v-chip>
+
+                    <SectionSelector
+                        :sections="playerStore.sections"
+                        @select="goToSection"
+                        v-if="track"
+                    />
+                </div>
 
                 <ProgressBar
                     :duration="playerStore.totalPhrases"
@@ -44,11 +52,6 @@
                     v-model="progress"
                 />
 
-                <SectionSelector
-                    :sections="playerStore.sections"
-                    @select="goToSection"
-                    v-if="track"
-                />
             </v-card-text>
 
         </v-card>

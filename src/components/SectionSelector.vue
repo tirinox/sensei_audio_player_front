@@ -56,7 +56,7 @@ function onSelect(section) {
 }
 
 .section-sep {
-    margin: 0 6px;
+    margin: 0 2px;
     opacity: 0.5;
 }
 </style>

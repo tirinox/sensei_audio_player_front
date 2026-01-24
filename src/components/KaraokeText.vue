@@ -38,6 +38,8 @@
 
         </div>
 
+        <v-divider class="mt-2 mb-4"></v-divider>
+
         <p class="phrase-text mt-4 mb-2">
             <span :key="currentIndex" v-html="displayedPhrase"></span>
         </p>
