@@ -59,6 +59,7 @@
             </v-btn>
             <div class="mt-2 text-subtitle-2">след</div>
         </div>
+
     </v-container>
 </template>
 

@@ -10,6 +10,8 @@ export const usePlayerStore = defineStore('player', {
         isPlaying: false,
         _howler: null,
         repeatOne: false,
+        repeatPauseMs: 1000,
+        _repeatTimer: null,
         isLoadingTrack: false,
         isPlayingCurrent: false,
         _playbackRate: +window.localStorage.getItem('playbackRate') || 1.0,
@@ -50,6 +52,7 @@ export const usePlayerStore = defineStore('player', {
 
         async selectTrack(track) {
             this.isLoadingTrack = true;
+            this.clearRepeatTimer();
 
             const tr = await this.fetchTrack(track);
             if (!tr) {
@@ -111,22 +114,28 @@ export const usePlayerStore = defineStore('player', {
         },
 
         async stop() {
+            this.clearRepeatTimer();
             this.isPlaying = false;
+            this.isPlayingCurrent = false;
             if (this._howler) {
                 this._howler.pause();
             }
         },
 
         async endPlay() {
-            this.isPlaying = false;
+            this.restorePlaybackRate()
+
             if (this.repeatOne) {
-                await this.nextPhrase(true)
+                this.scheduleRepeatCurrentPhrase();
+                return;
             }
 
-            this.restorePlaybackRate()
+            this.isPlaying = false;
+            this.isPlayingCurrent = false;
         },
 
         async prevPhrase() {
+            this.clearRepeatTimer();
             this.currentPhraseIndex -= 1
             if (this.currentPhraseIndex < 1) {
                 this.currentPhraseIndex = this.totalPhrases;
@@ -137,6 +146,7 @@ export const usePlayerStore = defineStore('player', {
         },
 
         async nextPhrase(justShift = false) {
+            this.clearRepeatTimer();
             if (this.isPlaying) {
                 this.togglePlayPause()
                 return;
@@ -154,6 +164,7 @@ export const usePlayerStore = defineStore('player', {
         },
 
         async restartTrack() {
+            this.clearRepeatTimer();
             this.currentPhraseIndex = 1;
             await this.playCurrentPhrase();
         },
@@ -166,6 +177,7 @@ export const usePlayerStore = defineStore('player', {
 
             const phrase = this.currentPhrase;
             if (phrase) {
+                this.clearRepeatTimer();
                 console.info(`Playing phrase ${this.currentPhraseIndex}/${this.totalPhrases}: ${phrase.text}`);
                 this._howler.stop();
                 this.isPlaying = true;
@@ -230,10 +242,54 @@ export const usePlayerStore = defineStore('player', {
 
         setPhrase(phraseIndex) {
             console.log('Set phrase:', phraseIndex)
+            this.clearRepeatTimer();
             this.currentPhraseIndex = phraseIndex
             if (this.isPlaying) {
                 this._howler.stop();
                 this.isPlaying = false;
+                this.isPlayingCurrent = false;
+            }
+        },
+
+        setRepeatOne(value) {
+            this.repeatOne = typeof value === 'boolean' ? value : !this.repeatOne;
+
+            if (!this.repeatOne) {
+                this.clearRepeatTimer();
+
+                if (!this._howler?.playing()) {
+                    this.isPlaying = false;
+                    this.isPlayingCurrent = false;
+                }
+            }
+        },
+
+        scheduleRepeatCurrentPhrase() {
+            this.clearRepeatTimer();
+
+            if (!this.repeatOne) {
+                this.isPlaying = false;
+                this.isPlayingCurrent = false;
+                return;
+            }
+
+            this.isPlaying = true;
+            this.isPlayingCurrent = true;
+            this._repeatTimer = window.setTimeout(() => {
+                this._repeatTimer = null;
+
+                if (!this.repeatOne || !this.isPlaying) {
+                    return;
+                }
+
+                this.playCurrentPhrase();
+            }, this.repeatPauseMs);
+        },
+
+        clearRepeatTimer() {
+            if (this._repeatTimer !== null) {
+                window.clearTimeout(this._repeatTimer);
+                this._repeatTimer = null;
             }
         },
 

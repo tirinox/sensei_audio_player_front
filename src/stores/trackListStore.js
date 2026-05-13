@@ -28,7 +28,7 @@ export const useTrackListStore = defineStore('trackList', {
                 // reverse order in the playlist
                 playlist = playlist.reverse();
 
-                console.log(playlist)
+                // console.log(playlist)
 
                 // set id for each track
                 playlist.forEach((track, index) => {
@@ -40,7 +40,7 @@ export const useTrackListStore = defineStore('trackList', {
                     const playerStore = usePlayerStore();
                     await playerStore.fetchTrack(this.playlist[0], this.dbBaseURL);
                 }
-                console.info(`Playlist: ${this.playlist.length}`)
+                console.info(`Playlist len: ${this.playlist.length}`)
                 return true
             } catch (error) {
                 console.error('Error fetching playlist:', error);
@@ -83,7 +83,9 @@ export const useTrackListStore = defineStore('trackList', {
                     return this.playlist;
                 } else {
                     const searchQ = this.searchQuery.trim().toLowerCase()
-                    return this.playlist.filter(track => track.title.toLowerCase().includes(searchQ));
+                    return this.playlist.filter(track => {
+                        return track.title.toLowerCase().includes(searchQ) || track.digest?.toLowerCase().includes(searchQ)
+                    });
                 }
             } catch (e) {
                 console.error(e)

@@ -46,11 +46,29 @@
                     />
                 </div>
 
-                <ProgressBar
-                    :duration="playerStore.totalPhrases"
-                    :is-loading="playerStore.isLoading"
-                    v-model="progress"
-                />
+                <div class="d-flex align-center ga-2">
+                    <div class="flex-grow-1">
+                        <ProgressBar
+                            :duration="playerStore.totalPhrases"
+                            :is-loading="playerStore.isLoading"
+                            v-model="progress"
+                        />
+                    </div>
+
+                    <v-btn
+                        icon
+                        size="44"
+                        :readonly="!controlsEnabled"
+                        :color="playerStore.repeatOne ? 'primary' : undefined"
+                        :variant="playerStore.repeatOne ? 'flat' : 'text'"
+                        @click="playerStore.setRepeatOne()"
+                    >
+                        <v-icon size="22">mdi-repeat-once</v-icon>
+                        <v-tooltip activator="parent" location="top">
+                            Повтор текущей фразы
+                        </v-tooltip>
+                    </v-btn>
+                </div>
 
             </v-card-text>
 
