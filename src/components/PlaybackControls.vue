@@ -1,19 +1,5 @@
 <template>
-    <v-container class="controls d-flex justify-space-between">
-        <div class="d-flex flex-column align-center justify-end">
-            <v-btn
-                icon
-                size="64"
-                class="player-btn"
-                :readonly="!enabled"
-                @click="emit('restart')"
-                v-on="longPressHandlers('restart')"
-            >
-                <v-icon size="30">mdi-skip-backward</v-icon>
-            </v-btn>
-            <div class="mt-2 text-subtitle-2">начало</div>
-        </div>
-
+    <v-container class="controls d-flex justify-space-between align-end ga-2">
         <div class="d-flex flex-column align-center justify-end">
             <v-btn
                 icon
@@ -31,15 +17,29 @@
         <div class="d-flex flex-column align-center justify-end">
             <v-btn
                 icon
-                size="64"
-                class="player-btn"
+                size="92"
+                class="player-btn player-btn--primary"
                 :readonly="!enabled"
                 @click="emit('playPause')"
                 v-on="longPressHandlers('playPause')"
             >
-                <v-icon size="30">
-                    {{ isPlaying && isPlayingCurrent ? "mdi-pause" : "mdi-replay" }}
+                <v-icon size="44">
+                    {{ isPlaying ? "mdi-pause" : "mdi-play" }}
                 </v-icon>
+            </v-btn>
+            <div class="mt-2 text-subtitle-2">{{ isPlaying ? 'пауза' : 'плей' }}</div>
+        </div>
+
+        <div class="d-flex flex-column align-center justify-end">
+            <v-btn
+                icon
+                size="64"
+                class="player-btn"
+                :readonly="!enabled"
+                @click="emit('replay')"
+                v-on="longPressHandlers('replay')"
+            >
+                <v-icon size="30">mdi-replay</v-icon>
             </v-btn>
             <div class="mt-2 text-subtitle-2">ещё</div>
         </div>
@@ -53,9 +53,7 @@
                 @click="emit('next')"
                 v-on="longPressHandlers('next')"
             >
-                <v-icon size="38">
-                    {{ isPlaying && !isPlayingCurrent ? "mdi-pause" : "mdi-skip-next" }}
-                </v-icon>
+                <v-icon size="38">mdi-skip-next</v-icon>
             </v-btn>
             <div class="mt-2 text-subtitle-2">след</div>
         </div>
@@ -68,7 +66,6 @@ import { computed } from "vue";
 
 const props = defineProps({
     isPlaying: { type: Boolean, required: true },
-    isPlayingCurrent: { type: Boolean, required: true },
     enabled: { type: Boolean, required: true },
 });
 
@@ -76,7 +73,7 @@ const props = defineProps({
  * click-события — как раньше
  * longTap — новый: длительность удержания в секундах
  */
-const emit = defineEmits(["restart", "prev", "playPause", "next", "longTap"]);
+const emit = defineEmits(["prev", "playPause", "replay", "next", "longTap"]);
 
 // ---- long press impl ----
 const isEnabled = computed(() => !!props.enabled);
@@ -135,7 +132,7 @@ function onPressCancel() {
 <style scoped>
 .controls {
     padding: 0 !important;
-    max-width: 500px;
+    max-width: 640px;
 }
 
 .player-btn {
@@ -146,5 +143,13 @@ function onPressCancel() {
     -webkit-user-select: none;
 
     -webkit-touch-callout: none; /* iOS: контекстное меню */
+}
+
+.player-btn--primary {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+}
+
+.controls :deep(.v-btn) {
+    flex-shrink: 0;
 }
 </style>

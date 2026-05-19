@@ -27,6 +27,23 @@
                     <div class="ml-2">Временная скорость речи: {{ playerStore.temporaryPlaybackRate }}x</div>
                 </v-row>
 
+                <div class="mt-4" v-if="track">
+                    <div class="d-flex justify-space-between text-caption text-medium-emphasis mb-1">
+                        <span>Прогресс фрагмента</span>
+                        <span>{{ currentPhraseProgressLabel }} / {{ currentPhraseDurationLabel }}</span>
+                    </div>
+
+                    <v-progress-linear
+                        :key="currentPhrasePlaybackSequence"
+                        :model-value="currentPhraseProgressPercent"
+                        :indeterminate="playerStore.isLoading"
+                        bg-color="blue-grey-lighten-4"
+                        color="yellow-darken-2"
+                        height="8"
+                        rounded
+                    />
+                </div>
+
             </v-card-text>
         </v-card>
 
@@ -78,7 +95,6 @@
             <v-card class="pa-2 w-100" elevation="0">
                 <PlaybackControls
                     :isPlaying="isPlaying"
-                    :isPlayingCurrent="playerStore.isPlayingCurrent"
                     :enabled="controlsEnabled"
                     @longTap="longTapPlayerAction"
                 />
@@ -97,6 +113,7 @@ import ProgressBar from '../components/ProgressBar.vue';
 import PlaybackControls from '../components/PlaybackControls.vue';
 import KaraokeText from "@/components/KaraokeText.vue";
 import SectionSelector from "@/components/SectionSelector.vue";
+import {toHHMMSS} from "@/helpers/DateHelpers.js";
 
 const playerStore = usePlayerStore();
 const router = useRouter();
@@ -110,10 +127,18 @@ const LONG_TAP_MAX_DURATION = 2.0; // seconds
 
 const track = computed(() => playerStore.currentTrack);
 const currentPhraseIndex = computed(() => playerStore.currentPhraseIndex);
+const currentPhrasePlaybackSequence = computed(() => playerStore.currentPhrasePlaybackSequence);
+const currentPhraseProgressPercent = computed(() => playerStore.currentPhraseProgressPercent);
+const currentPhraseProgressLabel = computed(() => formatTime(playerStore.currentPhraseProgressMs));
+const currentPhraseDurationLabel = computed(() => formatTime(playerStore.currentPhraseDurationMs));
 
 
 const st = {
     scrollTimeout: null,
+}
+
+const formatTime = (valueMs) => {
+    return toHHMMSS(Math.max(0, valueMs) / 1000);
 }
 
 const progress = computed({
@@ -181,6 +206,9 @@ const longTapPlayerAction = ({action, seconds}) => {
             break;
         case 'playPause':
             playerStore.togglePlayPause();
+            break;
+        case 'replay':
+            playerStore.playCurrentPhrase();
             break;
         case 'next':
             playerStore.nextPhrase();

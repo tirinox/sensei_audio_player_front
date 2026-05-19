@@ -7,8 +7,12 @@ export const usePlayerStore = defineStore('player', {
     state: () => ({
         currentTrack: null,
         currentPhraseIndex: 1,
+        currentPhrasePlaybackSequence: 0,
+        currentPhraseProgressMs: 0,
         isPlaying: false,
         _howler: null,
+        _currentPlaybackId: null,
+        _phraseProgressTimer: null,
         repeatOne: false,
         repeatPauseMs: 1000,
         _repeatTimer: null,
@@ -53,6 +57,8 @@ export const usePlayerStore = defineStore('player', {
         async selectTrack(track) {
             this.isLoadingTrack = true;
             this.clearRepeatTimer();
+            this.clearPhraseProgressTracking(true);
+            this._currentPlaybackId = null;
 
             const tr = await this.fetchTrack(track);
             if (!tr) {
@@ -89,37 +95,73 @@ export const usePlayerStore = defineStore('player', {
                 this.playCurrentPhrase();
             });
 
-            this._howler.on('end', () => {
+            this._howler.on('end', (id) => {
                 console.log('Finished playing');
+                if (id === this._currentPlaybackId) {
+                    this.currentPhraseProgressMs = this.currentPhraseDurationMs;
+                    this.clearPhraseProgressTracking(false);
+                    this._currentPlaybackId = null;
+                }
                 this.endPlay();
             });
 
             this._howler.on('loaderror', (id, error) => {
                 console.error('Error loading track:', error);
                 this.isLoadingTrack = false;
+                this.clearPhraseProgressTracking(true);
+                this._currentPlaybackId = null;
             });
 
             this._howler.on('playerror', (id, error) => {
                 console.error('Error playing track:', error);
                 this.isLoadingTrack = false;
+                this.clearPhraseProgressTracking(false);
+                this._currentPlaybackId = null;
             });
         },
 
         async togglePlayPause() {
             if (this.isPlaying) {
-                await this.stop();
+                await this.pauseCurrentPhrase();
             } else {
-                await this.playCurrentPhrase();
+                await this.resumeCurrentPhrase();
             }
         },
 
         async stop() {
+            await this.pauseCurrentPhrase();
+        },
+
+        async pauseCurrentPhrase() {
             this.clearRepeatTimer();
             this.isPlaying = false;
             this.isPlayingCurrent = false;
+            this.updateCurrentPhraseProgress(this._currentPlaybackId);
+            this.clearPhraseProgressTracking(false);
+
             if (this._howler) {
-                this._howler.pause();
+                this._howler.pause(this._currentPlaybackId ?? undefined);
             }
+        },
+
+        async resumeCurrentPhrase() {
+            if (!this._howler) {
+                console.error('resumeCurrentPhrase: Howler instance is not initialized');
+                return
+            }
+
+            this.clearRepeatTimer();
+
+            if (this._currentPlaybackId !== null) {
+                this._howler.play(this._currentPlaybackId);
+                this.isPlaying = true;
+                this.isPlayingCurrent = true;
+                this.startPhraseProgressTracking(this._currentPlaybackId, false);
+                this.setMediaMetadata()
+                return
+            }
+
+            await this.playCurrentPhrase();
         },
 
         async endPlay() {
@@ -142,16 +184,10 @@ export const usePlayerStore = defineStore('player', {
             }
 
             await this.playCurrentPhrase();
-            this.isPlayingCurrent = false
         },
 
         async nextPhrase(justShift = false) {
             this.clearRepeatTimer();
-            if (this.isPlaying) {
-                this.togglePlayPause()
-                return;
-            }
-
             this.currentPhraseIndex += 1;
             if (this.currentPhraseIndex > this.totalPhrases) {
                 this.currentPhraseIndex = 1;
@@ -159,7 +195,11 @@ export const usePlayerStore = defineStore('player', {
 
             if (!justShift) {
                 await this.playCurrentPhrase();
-                this.isPlayingCurrent = false
+            } else {
+                this.clearPhraseProgressTracking(true);
+                this._currentPlaybackId = null;
+                this.isPlaying = false;
+                this.isPlayingCurrent = false;
             }
         },
 
@@ -178,11 +218,14 @@ export const usePlayerStore = defineStore('player', {
             const phrase = this.currentPhrase;
             if (phrase) {
                 this.clearRepeatTimer();
+                this.clearPhraseProgressTracking(true);
+                this.currentPhrasePlaybackSequence += 1;
                 console.info(`Playing phrase ${this.currentPhraseIndex}/${this.totalPhrases}: ${phrase.text}`);
                 this._howler.stop();
                 this.isPlaying = true;
-                this._howler.play(String(this.currentPhraseIndex));
+                this._currentPlaybackId = this._howler.play(String(this.currentPhraseIndex));
                 this.isPlayingCurrent = true
+                this.startPhraseProgressTracking(this._currentPlaybackId);
 
                 this.setMediaMetadata()
             }
@@ -223,11 +266,11 @@ export const usePlayerStore = defineStore('player', {
                 });
 
                 navigator.mediaSession.setActionHandler('play', () => {
-                    this.playCurrentPhrase()
+                    this.resumeCurrentPhrase()
                 });
 
                 navigator.mediaSession.setActionHandler('pause', () => {
-                    this.stop()
+                    this.pauseCurrentPhrase()
                 });
 
                 navigator.mediaSession.setActionHandler('previoustrack', () => {
@@ -243,6 +286,11 @@ export const usePlayerStore = defineStore('player', {
         setPhrase(phraseIndex) {
             console.log('Set phrase:', phraseIndex)
             this.clearRepeatTimer();
+            this.clearPhraseProgressTracking(true);
+            if (this._howler && this._currentPlaybackId !== null) {
+                this._howler.stop(this._currentPlaybackId);
+            }
+            this._currentPlaybackId = null;
             this.currentPhraseIndex = phraseIndex
             if (this.isPlaying) {
                 this._howler.stop();
@@ -293,6 +341,64 @@ export const usePlayerStore = defineStore('player', {
             }
         },
 
+        updateCurrentPhraseProgress(playbackId = this._currentPlaybackId) {
+            if (!this._howler || playbackId === null || !this.currentPhrase) {
+                return;
+            }
+
+            const seekValue = this._howler.seek(playbackId);
+            if (typeof seekValue !== 'number' || Number.isNaN(seekValue)) {
+                return;
+            }
+
+            const durationSeconds = this.currentPhraseDurationMs / 1000;
+            const startSeconds = (this.currentPhrase?.start || 0) / 1000;
+            let normalizedSeek = seekValue;
+
+            if (normalizedSeek > durationSeconds + 0.25) {
+                normalizedSeek -= startSeconds;
+            }
+
+            this.currentPhraseProgressMs = Math.min(
+                Math.max(normalizedSeek, 0),
+                durationSeconds,
+            ) * 1000;
+        },
+
+        startPhraseProgressTracking(playbackId, resetProgress = true) {
+            if (playbackId === null || playbackId === undefined) {
+                return;
+            }
+
+            this.clearPhraseProgressTracking(resetProgress);
+            this._currentPlaybackId = playbackId;
+            this.updateCurrentPhraseProgress(playbackId);
+
+            this._phraseProgressTimer = window.setInterval(() => {
+                if (!this._howler || this._currentPlaybackId !== playbackId) {
+                    this.clearPhraseProgressTracking(false);
+                    return;
+                }
+
+                this.updateCurrentPhraseProgress(playbackId);
+
+                if (!this._howler.playing(playbackId)) {
+                    this.clearPhraseProgressTracking(false);
+                }
+            }, 50);
+        },
+
+        clearPhraseProgressTracking(resetProgress = false) {
+            if (this._phraseProgressTimer !== null) {
+                window.clearInterval(this._phraseProgressTimer);
+                this._phraseProgressTimer = null;
+            }
+
+            if (resetProgress) {
+                this.currentPhraseProgressMs = 0;
+            }
+        },
+
         setRatePlaybackRate(rate, once = false) {
             if (!this._howler) {
                 console.error('setRatePlaybackRate: Howler instance is not initialized');
@@ -319,6 +425,20 @@ export const usePlayerStore = defineStore('player', {
     getters: {
         currentPhrase() {
             return this.currentTrack.segments[this.currentPhraseIndex - 1];
+        },
+        currentPhraseDurationMs() {
+            if (!this.currentPhrase) {
+                return 0;
+            }
+
+            return Math.max(this.currentPhrase.end - this.currentPhrase.start, 0);
+        },
+        currentPhraseProgressPercent() {
+            if (!this.currentPhraseDurationMs) {
+                return 0;
+            }
+
+            return Math.min((this.currentPhraseProgressMs / this.currentPhraseDurationMs) * 100, 100);
         },
         totalPhrases() {
             return this.currentTrack.segments.length
