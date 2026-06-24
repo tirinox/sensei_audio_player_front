@@ -1,10 +1,7 @@
 import {defineStore} from 'pinia';
 import {usePlayerStore} from "@/stores/playerStore.js";
 import router from "@/router/index.js";
-
-
-const BASE_PATH = '/audio_db'
-console.info('Audio base path:', BASE_PATH);
+import {fetchPlaylistByCode} from "@/helpers/playlistByCode.js";
 
 export const useTrackListStore = defineStore('trackList', {
     state: () => ({
@@ -15,36 +12,30 @@ export const useTrackListStore = defineStore('trackList', {
         _currentCode: '',
     }),
     actions: {
-        async fetchPlaylist(code) {
+        async fetchPlaylist(code = this._currentCode) {
             try {
-                this._currentCode = code;
                 this.isLoadingPlaylist = true;
-                const indexFile = `${this.dbBaseURL}/index.json?r=${Math.random()}`
-                console.info('Fetching playlist:', indexFile);
-                const response = await fetch(indexFile);
-                const data = await response.json();
+                const result = await fetchPlaylistByCode(code);
+                if (!result.success) {
+                    return result;
+                }
 
-                let playlist = data.files;
-                // reverse order in the playlist
-                playlist = playlist.reverse();
-
-                // console.log(playlist)
-
-                // set id for each track
-                playlist.forEach((track, index) => {
-                    track.id = index;
-                    track.title = track.audio_file;
-                });
-                this.playlist = playlist;
+                this._currentCode = result.code;
+                this.playlist = result.playlist;
                 if (this.playlist.length > 0) {
                     const playerStore = usePlayerStore();
                     await playerStore.fetchTrack(this.playlist[0], this.dbBaseURL);
                 }
                 console.info(`Playlist len: ${this.playlist.length}`)
-                return true
+                return result
             } catch (error) {
                 console.error('Error fetching playlist:', error);
-                return false
+                return {
+                    success: false,
+                    error,
+                    code: this._currentCode,
+                    trackCount: 0,
+                }
             } finally {
                 this.isLoadingPlaylist = false;
             }
@@ -74,7 +65,7 @@ export const useTrackListStore = defineStore('trackList', {
     },
     getters: {
         dbBaseURL() {
-            return `${BASE_PATH}/${this._currentCode}`
+            return `/audio_db/${this._currentCode}`
         },
 
         playlistFiltered() {

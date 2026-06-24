@@ -1,17 +1,41 @@
 import {defineStore} from 'pinia';
 import router from "@/router/index.js";
 import {useTrackListStore} from "@/stores/trackListStore.js";
+import {clearAccessCode} from "@/helpers/playlistByCode.js";
 
 
-const LOCAL_STORAGE_KEY = 'userAccessCode';
+const CURRENT_ACCESS_CODE_KEY = 'userAccessCode';
+const RECENT_ACCESS_CODES_KEY = 'recentAccessCodes';
+const RECENT_ACCESS_CODES_LIMIT = 5;
 
-function clearAccessCode(code) {
-    return code.trim().toUpperCase();
+function readRecentAccessCodes() {
+    const rawValue = window.localStorage.getItem(RECENT_ACCESS_CODES_KEY);
+
+    if (!rawValue) {
+        return [];
+    }
+
+    try {
+        const parsedValue = JSON.parse(rawValue);
+        if (!Array.isArray(parsedValue)) {
+            return [];
+        }
+
+        return parsedValue.filter(item => {
+            return typeof item?.accessCode === 'string'
+                && item.accessCode
+                && typeof item.trackCount === 'number';
+        });
+    } catch (error) {
+        console.error('Error reading recent access codes:', error);
+        return [];
+    }
 }
 
 export const useAccess = defineStore('userAccess', {
     state: () => ({
-        accessCode: window.localStorage.getItem(LOCAL_STORAGE_KEY) || '',
+        accessCode: window.localStorage.getItem(CURRENT_ACCESS_CODE_KEY) || '',
+        recentAccessCodes: readRecentAccessCodes(),
         accessGranted: false,
         isLoading: true,
         appVersion: import.meta.env.VITE_APP_VERSION || 'unknown',
@@ -20,7 +44,20 @@ export const useAccess = defineStore('userAccess', {
         _saveAccessCode(accessCode) {
             this.accessCode = accessCode;
             // save to local storage
-            window.localStorage.setItem(LOCAL_STORAGE_KEY, accessCode);
+            window.localStorage.setItem(CURRENT_ACCESS_CODE_KEY, accessCode);
+        },
+
+        _saveRecentAccessCode(accessCode, trackCount) {
+            const nextRecentAccessCodes = [
+                {
+                    accessCode,
+                    trackCount,
+                },
+                ...this.recentAccessCodes.filter(item => item.accessCode !== accessCode),
+            ].slice(0, RECENT_ACCESS_CODES_LIMIT);
+
+            this.recentAccessCodes = nextRecentAccessCodes;
+            window.localStorage.setItem(RECENT_ACCESS_CODES_KEY, JSON.stringify(nextRecentAccessCodes));
         },
 
         async submitAccessCode(accessCode) {
@@ -30,13 +67,16 @@ export const useAccess = defineStore('userAccess', {
                 const trackListStore = useTrackListStore();
                 accessCode = clearAccessCode(accessCode);
                 const result = await trackListStore.fetchPlaylist(accessCode);
-                if (result) {
-                    this._saveAccessCode(accessCode);
+                if (result.success) {
+                    this._saveAccessCode(result.code);
+                    this._saveRecentAccessCode(result.code, result.trackCount);
                     this.accessGranted = true;
                     // redirect to player page
                     router.replace({ name: 'playlist' })
+                } else {
+                    this.accessGranted = false;
                 }
-                return result;
+                return result.success;
             }
             finally {
                 this.isLoading = false;
