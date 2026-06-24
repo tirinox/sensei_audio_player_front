@@ -2,6 +2,7 @@ import {defineStore} from 'pinia';
 import {usePlayerStore} from "@/stores/playerStore.js";
 import router from "@/router/index.js";
 import {fetchPlaylistByCode} from "@/helpers/playlistByCode.js";
+import {useListenStatsStore} from "@/stores/listenStatsStore.js";
 
 export const useTrackListStore = defineStore('trackList', {
     state: () => ({
@@ -21,6 +22,8 @@ export const useTrackListStore = defineStore('trackList', {
                 }
 
                 this._currentCode = result.code;
+                const listenStatsStore = useListenStatsStore();
+                await listenStatsStore.loadForCode(result.code);
                 this.playlist = result.playlist;
                 if (this.playlist.length > 0) {
                     const playerStore = usePlayerStore();
@@ -64,6 +67,10 @@ export const useTrackListStore = defineStore('trackList', {
 
     },
     getters: {
+        currentCode() {
+            return this._currentCode;
+        },
+
         dbBaseURL() {
             return `/audio_db/${this._currentCode}`
         },
@@ -82,6 +89,15 @@ export const useTrackListStore = defineStore('trackList', {
                 console.error(e)
                 return []
             }
+        },
+
+        playlistFilteredWithStats() {
+            const listenStatsStore = useListenStatsStore();
+
+            return this.playlistFiltered.map(track => ({
+                ...track,
+                listenCount: listenStatsStore.getTrackListenCount(this._currentCode, track.audio_file),
+            }));
         },
 
         isAnyTracksMatching() {

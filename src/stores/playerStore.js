@@ -1,6 +1,7 @@
 import {defineStore} from 'pinia';
 import {Howl} from 'howler';
 import {useTrackListStore} from "@/stores/trackListStore.js";
+import {useListenStatsStore} from "@/stores/listenStatsStore.js";
 
 
 export const usePlayerStore = defineStore('player', {
@@ -101,6 +102,9 @@ export const usePlayerStore = defineStore('player', {
                     this.currentPhraseProgressMs = this.currentPhraseDurationMs;
                     this.clearPhraseProgressTracking(false);
                     this._currentPlaybackId = null;
+                    this.recordCurrentPhraseCompletion().catch((error) => {
+                        console.error('Error recording phrase completion:', error);
+                    });
                 }
                 this.endPlay();
             });
@@ -174,6 +178,31 @@ export const usePlayerStore = defineStore('player', {
 
             this.isPlaying = false;
             this.isPlayingCurrent = false;
+        },
+
+        async recordCurrentPhraseCompletion() {
+            if (!this.currentTrack || !this.currentPhrase) {
+                return;
+            }
+
+            const trackDurationMs = this.currentTrackDurationMs;
+            if (!(trackDurationMs > 0)) {
+                throw new Error(`Track duration is invalid for ${this.currentTrack.audio_file}`);
+            }
+
+            const phraseDurationMs = this.currentPhraseDurationMs;
+            if (!(phraseDurationMs > 0)) {
+                return;
+            }
+
+            const trackListStore = useTrackListStore();
+            const listenStatsStore = useListenStatsStore();
+
+            await listenStatsStore.addTrackListen({
+                accessCode: trackListStore.currentCode,
+                audioFile: this.currentTrack.audio_file,
+                amount: phraseDurationMs / trackDurationMs,
+            });
         },
 
         async prevPhrase() {
@@ -439,6 +468,16 @@ export const usePlayerStore = defineStore('player', {
             }
 
             return Math.min((this.currentPhraseProgressMs / this.currentPhraseDurationMs) * 100, 100);
+        },
+        currentTrackDurationMs() {
+            const trackLengthSeconds = Number(this.currentTrack?.length);
+            if (Number.isFinite(trackLengthSeconds) && trackLengthSeconds > 0) {
+                return trackLengthSeconds * 1000;
+            }
+
+            return (this.currentTrack?.segments || []).reduce((maxDuration, segment) => {
+                return Math.max(maxDuration, Number(segment?.end) || 0);
+            }, 0);
         },
         totalPhrases() {
             return this.currentTrack.segments.length

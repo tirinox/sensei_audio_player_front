@@ -32,10 +32,10 @@
                 item-props
             >
                 <v-list-item
-                    v-for="track in trackListStore.playlistFiltered"
+                v-for="track in trackListStore.playlistFilteredWithStats"
                     :key="track.id"
                     @click="trackListStore.selectTrack(track)"
-                    :subtitle="track.n_segments + ' фраз.'"
+                :subtitle="`${track.n_segments} фраз. · Прослушано: ${formatListenCount(track.listenCount)}`"
                 >
                     <template v-slot:prepend>
                         <v-avatar :color="!isDark ? 'grey-lighten-1' : 'grey-darken-3'">
@@ -70,6 +70,13 @@ import {useIsDark} from "@/helpers/Themes.js";
 const accessStore = useAccess()
 const trackListStore = useTrackListStore();
 const isDark = useIsDark()
+const listenCountFormatter = new Intl.NumberFormat('ru-RU', {
+    maximumFractionDigits: 2,
+});
+
+const formatListenCount = (value) => {
+    return listenCountFormatter.format(Number.isFinite(value) ? value : 0);
+}
 
 const pullToRefresh = async ({done}) => {
     accessStore.loadOnStart().then(() => done());
