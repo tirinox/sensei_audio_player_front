@@ -43,11 +43,44 @@
                 </v-btn>
             </v-list-item>
 
+            <v-list-item @click="openAboutDialog">
+                <v-list-item-title>О приложении</v-list-item-title>
+            </v-list-item>
+
             <v-list-item @click="exit">
                 <v-list-item-title>Выход</v-list-item-title>
             </v-list-item>
         </v-list>
     </v-menu>
+
+    <v-dialog v-model="isAboutDialogOpen" max-width="420">
+        <v-card>
+            <v-card-title class="text-center pt-6">
+                О приложении
+            </v-card-title>
+
+            <v-card-text class="text-center">
+                <v-img
+                    src="logo.png"
+                    width="96"
+                    height="96"
+                    class="mx-auto mb-4 rounded-circle"
+                />
+
+                <div class="text-h6 mb-2">Sensei Audio</div>
+                <div class="mb-1">Версия: {{ accessStore.appVersion }}</div>
+                <div class="mb-1">Автор: Tirinox</div>
+                <div>&copy; {{ copyrightYears }} Tirinox</div>
+            </v-card-text>
+
+            <v-card-actions>
+                <v-spacer />
+                <v-btn variant="text" @click="isAboutDialogOpen = false">
+                    Закрыть
+                </v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 
 <script setup>
@@ -61,8 +94,10 @@ const trackListStore = useTrackListStore()
 
 const theme = useTheme()
 const THEME_KEY = 'app_theme_mode' // 'light' or 'dark'
+const COPYRIGHT_START_YEAR = 2024
 
 const isMenuOpen = ref(false)
+const isAboutDialogOpen = ref(false)
 const currentMode = ref('light')
 
 // Load theme from localStorage
@@ -79,6 +114,14 @@ const nextThemeLabel = computed(() =>
     currentMode.value === 'light' ? 'Тёмная' : 'Светлая'
 )
 
+const copyrightYears = computed(() => {
+    const currentYear = new Date().getFullYear()
+
+    return currentYear > COPYRIGHT_START_YEAR
+        ? `${COPYRIGHT_START_YEAR}-${currentYear}`
+        : `${COPYRIGHT_START_YEAR}`
+})
+
 // Toggle theme
 function closeMenu() {
     isMenuOpen.value = false
@@ -93,6 +136,11 @@ function toggleTheme() {
     currentMode.value = currentMode.value === 'light' ? 'dark' : 'light'
     theme.global.name.value = currentMode.value
     localStorage.setItem(THEME_KEY, currentMode.value)
+    closeMenu()
+}
+
+function openAboutDialog() {
+    isAboutDialogOpen.value = true
     closeMenu()
 }
 
