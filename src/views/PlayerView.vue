@@ -114,6 +114,7 @@ import PlaybackControls from '../components/PlaybackControls.vue';
 import KaraokeText from "@/components/KaraokeText.vue";
 import SectionSelector from "@/components/SectionSelector.vue";
 import {toHHMMSS} from "@/helpers/DateHelpers.js";
+import {SHORT_TAP_MAX_DURATION, slowdownRate} from "@/helpers/playbackSlowdown.js";
 
 const playerStore = usePlayerStore();
 const router = useRouter();
@@ -121,10 +122,6 @@ const router = useRouter();
 const isPlaying = computed(() => playerStore.isPlaying);
 
 const SPEED_CONTROL_ENABLED = false;
-const MAX_SLOW_RATE = 0.5;
-const SHORT_TAP_MAX_DURATION = 0.17; // seconds
-const LONG_TAP_MAX_DURATION = 2.0; // seconds
-
 const track = computed(() => playerStore.currentTrack);
 const currentPhraseIndex = computed(() => playerStore.currentPhraseIndex);
 const currentPhrasePlaybackSequence = computed(() => playerStore.currentPhrasePlaybackSequence);
@@ -177,6 +174,10 @@ const controlsEnabled = computed(() => {
 });
 
 const keyDownHandler = (event) => {
+    // Пробел на кнопке обрабатывает сама кнопка через click.
+    if (event.key === ' ' && event.target instanceof HTMLElement &&
+        event.target.closest('button, input, textarea, select, [contenteditable="true"]')) return;
+
     playerStore.restorePlaybackRate()
     if (event.key === ' ') {
         playerStore.togglePlayPause()
@@ -189,10 +190,7 @@ const keyDownHandler = (event) => {
 
 const longTapPlayerAction = ({action, seconds}) => {
     if (seconds > SHORT_TAP_MAX_DURATION) {
-        const clampedSeconds = Math.min(Math.max(seconds, SHORT_TAP_MAX_DURATION), LONG_TAP_MAX_DURATION);
-        // slow down rate from 1.0 to MAX_SLOW_RATE linearly
-        const newRate = 1.0 - (clampedSeconds - SHORT_TAP_MAX_DURATION) /
-            (LONG_TAP_MAX_DURATION - SHORT_TAP_MAX_DURATION) * (1.0 - MAX_SLOW_RATE);
+        const newRate = slowdownRate(seconds);
 
         console.log(`Long tap detected: ${seconds.toFixed(2)}s, setting rate to ${newRate.toFixed(2)}x`);
         playerStore.setRatePlaybackRate(parseFloat(newRate.toFixed(2)), true);
